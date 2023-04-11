@@ -8,11 +8,11 @@ using System;
 
 namespace MyFire.Services
 {
-    public class GoogleSheetsService
+    public class GoogleSheetReader: ISheetReader
     {
         private SheetsService GoogleSheetsApiService { get; set; }
         private char[] AlphRange { get; set; }
-        public GoogleSheetsService(SheetsService googleSheetsApiService, char[] alphaRange)
+        public GoogleSheetReader(SheetsService googleSheetsApiService, char[] alphaRange)
         {
             GoogleSheetsApiService = googleSheetsApiService;
             AlphRange = alphaRange;
