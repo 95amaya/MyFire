@@ -2,14 +2,10 @@
 using SheetsQuickstart;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Sheets.v4;
-using Google.Apis.Sheets.v4.Data;
 using Google.Apis.Services;
 using Google.Apis.Util.Store;
 using System.IO;
 using System.Threading;
-using MyFire.Services;
-using MyFire.Models;
-using Newtonsoft.Json;
 
 namespace MyFire
 {
@@ -21,16 +17,16 @@ namespace MyFire
         private static readonly char[] ALPHA =  "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
         static void Main(string[] args)
         {
-            // Console.WriteLine("Hello World!");
-            // GoogleSheetsDemo.Run(args);
+            Console.WriteLine("Hello World!");
+            GoogleSheetsDemo.Run(args);
             // -- Create Google Sheet 
-            var googleSheetsApiService = NewSheetService();
-            var financeService = new FinanceService();
-            var googleSheetsService = new GoogleSheetsService(googleSheetsApiService, ALPHA);
+            // var googleSheetsApiService = NewSheetService();
+            // var financeService = new FinanceService();
+            // var googleSheetsService = new GoogleSheetsService(googleSheetsApiService, ALPHA);
             // var testData = googleSheetsService.ReadSheet<Test>(SHEET_ID, "A1:B2");
-            var cmpIntTable = financeService.BuildCompoundInterestTable(1000, .15, 5);
-            var resp = googleSheetsService.WriteSheet(cmpIntTable, SHEET_ID, "A1:D20", header:"Year,Curr,Intr,Total,rate=5%,contribution=");
-            Console.WriteLine(JsonConvert.SerializeObject(resp));
+            // var cmpIntTable = financeService.BuildCompoundInterestTable(1000, .15, 5);
+            // var resp = googleSheetsService.WriteSheet(cmpIntTable, SHEET_ID, "A1:D20", header:"Year,Curr,Intr,Total,rate=5%,contribution=");
+            // Console.WriteLine(JsonConvert.SerializeObject(resp));
         }
 
         private static SheetsService NewSheetService()
@@ -44,7 +40,7 @@ namespace MyFire
                 // automatically when the authorization flow completes for the first time.
                 string credPath = "token.json";
                 credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                    GoogleClientSecrets.Load(stream).Secrets,
+                    GoogleClientSecrets.FromStream(stream).Secrets,
                     SCOPES,
                     "user",
                     CancellationToken.None,
