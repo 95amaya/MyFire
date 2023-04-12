@@ -7,10 +7,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using AutoMapper;
+using MyFire.Services;
+using MyFire.Models;
 
 namespace SheetsQuickstart
 {
-    public static class GoogleSheetsDemo
+    public static class GoogleSheetsServicesDemo
     {
         // If modifying these scopes, delete your previously saved credentials
         // at ~/.credentials/sheets.googleapis.com-dotnet-quickstart.json
@@ -19,6 +22,8 @@ namespace SheetsQuickstart
 
         public static void Run(string[] args)
         {
+            var _mapper = InitializeAutomapper();
+
             UserCredential credential;
 
             using (var stream =
@@ -37,37 +42,40 @@ namespace SheetsQuickstart
             }
 
             // Create Google Sheets API service.
-            var service = new SheetsService(new BaseClientService.Initializer()
+            var googleSheetApiClient = new SheetsService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential,
                 ApplicationName = ApplicationName,
             });
 
+            // Create Reader 
+            var googleSheetReader = new GoogleSheetReader(_mapper, new GoogleSheetClient(googleSheetApiClient)); 
+
             // Define request parameters.
             String spreadsheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms";
             String range = "Class Data!A2:E";
-            SpreadsheetsResource.ValuesResource.GetRequest request =
-                    service.Spreadsheets.Values.Get(spreadsheetId, range);
+
+            var students = googleSheetReader.ReadFrom<Student>(spreadsheetId, range); 
 
             // Prints the names and majors of students in a sample spreadsheet:
             // https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
-            ValueRange response = request.Execute();
-            IList<IList<Object>> values = response.Values;
-
-            if (values != null && values.Count > 0)
+            foreach(var student in students)
             {
-                Console.WriteLine("Name, Major");
-                foreach (var row in values)
-                {
-                    // Print columns A and E, which correspond to indices 0 and 4.
-                    Console.WriteLine(string.Join(",", row));
-
-                }
+                Console.WriteLine(student);
             }
-            else
-            {
-                Console.WriteLine("No data found.");
-            }
+        }
+    
+        private static IMapper InitializeAutomapper()
+        {
+            var config = new MapperConfiguration(cfg => {
+                cfg.CreateMap<IList<Object>, Student>()
+                    .ForMember(dest => dest.FirstName, act => act.MapFrom(src => src[0]))
+                    .ForMember(dest => dest.Sex, act => act.MapFrom(src => src[1]))
+                    .ForMember(dest => dest.Class, act => act.MapFrom(src => src[2]))
+                    .ForMember(dest => dest.City, act => act.MapFrom(src => src[3]))
+                    .ForMember(dest => dest.Major, act => act.MapFrom(src => src[4]));
+            });
+            return config.CreateMapper();
         }
     }
 }

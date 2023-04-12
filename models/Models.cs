@@ -1,13 +1,4 @@
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Sheets.v4;
-using Google.Apis.Sheets.v4.Data;
-using Google.Apis.Services;
-using Google.Apis.Util.Store;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using Newtonsoft.Json;
 
 namespace MyFire.Models
 {
@@ -50,6 +41,20 @@ namespace MyFire.Models
             { 
                 return new object[]{Year, CurrentVal, InterestVal, TotalVal };
             }
+        }
+    }
+
+    public class Student
+    {
+        public string FirstName {get; set;}
+        public string Sex {get; set;}
+        public string Class {get; set;}
+        public string City {get; set;}
+        public string Major {get; set;}
+
+        public override string ToString()
+        {
+            return $"{FirstName}, {Major}, {City}";
         }
     }
 }

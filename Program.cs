@@ -14,11 +14,12 @@ namespace MyFire
         private static readonly string APP_NAME = "MyFireApp";
         private static readonly string[] SCOPES = { SheetsService.Scope.Spreadsheets };
         private static readonly string SHEET_ID = "11whvaSd_jqHFKNy_a1yoqVFA3KVvm_XslT27eiR0Vsk";
-        private static readonly char[] ALPHA =  "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            GoogleSheetsDemo.Run(args);
+            // GoogleSheetsDemo.Run(args);
+            GoogleSheetsServicesDemo.Run(args);
+            
             // -- Create Google Sheet 
             // var googleSheetsApiService = NewSheetService();
             // var financeService = new FinanceService();
