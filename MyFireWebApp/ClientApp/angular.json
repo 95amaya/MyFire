@@ -132,5 +132,8 @@
       }
     }
   },
-  "defaultProject": "MyFireWebApp"
+  "defaultProject": "MyFireWebApp",
+  "cli": {
+    "analytics": "2512e9e0-5fc1-41fa-8c11-acf26b4fe9fb"
+  }
 }
