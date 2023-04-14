@@ -1,14 +1,9 @@
 using AutoMapper;
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
-using Google.Apis.Util.Store;
-using MyFire.Models;
+using MyFireConsoleApp.Models;
 using MyFireCoreLibraries;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Threading;
 
 namespace Demo;
 public static class GoogleSheetsServicesDemo
