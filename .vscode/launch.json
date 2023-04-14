@@ -9,9 +9,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/bin/Debug/net7.0/MyFire.dll",
+            "program": "${workspaceFolder}/MyFireConsoleApp/bin/Debug/net7.0/MyFireConsoleApp.dll",
             "args": [],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/MyFireConsoleApp",
             "console": "internalConsole",
             "stopAtEntry": false
         },

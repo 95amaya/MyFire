@@ -1,27 +1,21 @@
 using Google.Apis.Sheets.v4;
-using Google.Apis.Sheets.v4.Data;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using MyFire.Models;
-using System;
+using MyFireCoreLibraries;
 
 namespace MyFire.Services
 {
     public class GoogleSheetWriter: ISheetWriter
     {
         private SheetsService GoogleSheetsApiService { get; set; }
-        private char[] AlphRange { get; set; }
-        public GoogleSheetWriter(SheetsService googleSheetsApiService, char[] alphaRange)
+        public GoogleSheetWriter(SheetsService googleSheetsApiService)
         {
             GoogleSheetsApiService = googleSheetsApiService;
-            AlphRange = alphaRange;
         }
 
-        public bool WriteTo<T>(IEnumerable<T> list, string spreadsheetId, string range, string header = null) where T : class, new()
+        public bool WriteTo<T>(IEnumerable<T> list, string spreadsheetId, string range, string? header = null) where T : class, new()
         {
             throw new NotImplementedException();
         }
+
 
         // public UpdateValuesResponse WriteSheet<T>(IEnumerable<T> list, string spreadsheetId, string range, string header = null)
         //     where T: GoogleSheetModel
