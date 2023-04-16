@@ -2,9 +2,7 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-nav-menu',
-  template: ` <nav
-    class="bg-white border-gray-200 dark:bg-gray-900 shadow-sm mb-4"
-  >
+  template: ` <nav class="bg-white border-gray-200 shadow mb-4">
     <div
       class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto px-4 py-2"
     >

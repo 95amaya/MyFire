@@ -16,9 +16,6 @@ import { Component } from '@angular/core';
         <a href="http://www.typescriptlang.org/">TypeScript</a> for client-side
         code
       </li>
-      <li>
-        <a href="http://getbootstrap.com/">Bootstrap</a> for layout and styling
-      </li>
     </ul>
     <p>To help you get started, we've also set up:</p>
     <ul>
