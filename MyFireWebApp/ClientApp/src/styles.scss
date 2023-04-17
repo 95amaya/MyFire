@@ -1,6 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 @use '@ng-select/ng-select/scss/default.theme' with (
-  $ng-select-height: var(--theme-height)
+  $ng-select-height: var(--theme-height),
+  // $ng-select-bg: var()
 );
 
 @tailwind base;
