@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-counter-component',
@@ -75,6 +76,7 @@ import { Component } from '@angular/core';
       <div class="p-3 flex flex-col justify-around">
         <div class="h5">Dropdown</div>
         <ng-select
+          [style.--theme-height.rem]="themeHeight.value"
           [items]="carOptions"
           bindLabel="name"
           bindValue="id"
@@ -93,6 +95,8 @@ export class CounterComponent {
   public currentCount = 0;
   public myDate = null;
   public selectedCar = null;
+  public themeHeight = new FormControl(4);
+  public toggledThemeHeight = false;
 
   public carOptions = [
     { id: 1, name: 'Volvo' },
@@ -103,5 +107,12 @@ export class CounterComponent {
 
   public incrementCounter() {
     this.currentCount++;
+    this.toggledThemeHeight = !this.toggledThemeHeight;
+
+    if (this.toggledThemeHeight) {
+      this.themeHeight.setValue(6);
+    } else {
+      this.themeHeight.setValue(2);
+    }
   }
 }
