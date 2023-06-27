@@ -39,7 +39,7 @@ public static class DemoHelper
         });
     }
 
-    public static Secrets Read(string path)
+    public static Secrets ReadFromJson(string path)
     {
         using (StreamReader file = new StreamReader(path))
         {
@@ -56,6 +56,22 @@ public static class DemoHelper
                 return null;
             }
         }
+    }
+
+    public static void WriteToJson(string path, Object obj)
+    {
+        var jsonObj = JsonConvert.SerializeObject(obj);
+
+        using StreamWriter file = new StreamWriter(path);
+        try
+        {
+            file.Write(jsonObj);
+        }
+        catch (Exception)
+        {
+            Console.WriteLine("Problem reading file");
+        }
+
     }
 
 }

@@ -8,7 +8,7 @@ class Program
     {
         Console.WriteLine("Hello World!");
 
-        var secrets = DemoHelper.Read("secrets.json");
+        var secrets = DemoHelper.ReadFromJson("secrets.json");
         // GoogleSheetsDemo.Run(args);
         // GoogleSheetsServicesDemo.Run(args);
         MyFireDemo.Run(args, secrets);
