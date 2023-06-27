@@ -1,10 +1,8 @@
-using System;
-using System.Collections.Generic;
 using Google.Apis.Sheets.v4;
 
 namespace MyFireCoreLibraries;
 
-public class GoogleSheetClient: ISheetClient
+public class GoogleSheetClient : ISheetClient
 {
     private SheetsService _googleSheetsApiClient { get; set; }
 
@@ -13,7 +11,7 @@ public class GoogleSheetClient: ISheetClient
         _googleSheetsApiClient = googleSheetsApiClient;
     }
 
-    public IList<IList<Object>> GetValues(string spreadsheetId, string range) 
+    public IList<IList<Object>> GetValues(string spreadsheetId, string range)
     {
         var request = _googleSheetsApiClient.Spreadsheets.Values.Get(spreadsheetId, range);
         var response = request.Execute();

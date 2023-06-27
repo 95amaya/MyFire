@@ -1,5 +1,4 @@
 ﻿using Demo;
-using Google.Apis.Sheets.v4;
 using System;
 
 namespace MyFireConsoleApp;
@@ -8,9 +7,12 @@ class Program
     static void Main(string[] args)
     {
         Console.WriteLine("Hello World!");
+
+        var secrets = DemoHelper.Read("secrets.json");
         // GoogleSheetsDemo.Run(args);
-        GoogleSheetsServicesDemo.Run(args);
-        
+        // GoogleSheetsServicesDemo.Run(args);
+        MyFireDemo.Run(args, secrets);
+
         // -- Create Google Sheet 
         // var googleSheetsApiService = NewSheetService();
         // var financeService = new FinanceService();
@@ -20,6 +22,4 @@ class Program
         // var resp = googleSheetsService.WriteSheet(cmpIntTable, SHEET_ID, "A1:D20", header:"Year,Curr,Intr,Total,rate=5%,contribution=");
         // Console.WriteLine(JsonConvert.SerializeObject(resp));
     }
-
-    
 }

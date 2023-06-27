@@ -1,13 +1,40 @@
 /* You can add global styles to this file, and also import other style files */
+// https://stackoverflow.com/questions/55329996/how-to-create-color-shades-using-css-variables-similar-to-darken-of-sass
 @use '@ng-select/ng-select/scss/default.theme' with (
-  $ng-select-height: var(--theme-height),
-  // $ng-select-bg: var()
+  $ng-select-highlight: var(--ng-select-highlight),
+  $ng-select-primary-text: var(--ng-select-primary-text),
+  $ng-select-disabled-text: var(--ng-select-disabled-text),
+  $ng-select-border: var(--ng-select-border),
+  $ng-select-bg: var(--ng-select-bg),
+
+  $ng-select-selected: var(--ng-select-selected),
+  $ng-select-marked: var(--ng-select-marked),
+  $ng-select-placeholder: var(--ng-select-placeholder),
+  $ng-select-dropdown-option-disabled: var(--ng-select-dropdown-option-disabled)
 );
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --theme-height: 2rem;
+:root .light-dropdown {
+  --ng-select-highlight: #007eff;
+  --ng-select-primary-text: #333;
+  --ng-select-disabled-text: #f9f9f9;
+  --ng-select-border: #ccc;
+  --ng-select-bg: #ffffff;
+
+  --ng-select-selected: lighten(--ng-select-highlight, 46);
+  --ng-select-marked: lighten(--ng-select-highlight, 46);
+  --ng-select-placeholder: lighten(--ng-select-primary-text, 40);
+  --ng-select-dropdown-option-disabled: lighten(--ng-select-primary-text, 60);
+
+}
+
+:root .dark-dropdown {
+  --ng-select-highlight: #007eff;
+  --ng-select-primary-text: #333;
+  --ng-select-disabled-text: #f9f9f9;
+  --ng-select-border: #ccc;
+  --ng-select-bg: #ffffff;
 }

@@ -5,6 +5,8 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Util.Store;
+using MyFireConsoleApp.Models;
+using Newtonsoft.Json;
 
 namespace Demo;
 
@@ -36,4 +38,24 @@ public static class DemoHelper
             ApplicationName = appName,
         });
     }
+
+    public static Secrets Read(string path)
+    {
+        using (StreamReader file = new StreamReader(path))
+        {
+            try
+            {
+                string json = file.ReadToEnd();
+
+                return JsonConvert.DeserializeObject<Secrets>(json);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Problem reading file");
+
+                return null;
+            }
+        }
+    }
+
 }

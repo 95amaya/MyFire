@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using AutoMapper;
 
 namespace MyFireCoreLibraries;
 
-public class GoogleSheetReader: ISheetReader
+public class GoogleSheetReader : ISheetReader
 {
     private ISheetClient _googleSheetsApiClient { get; set; }
     private IMapper _mapper { get; set; }
@@ -16,11 +13,11 @@ public class GoogleSheetReader: ISheetReader
     }
 
     public IList<T> ReadFrom<T>(string spreadsheetId, string range)
-    where T: class, new() 
+    where T : class, new()
     {
         var rawValues = _googleSheetsApiClient.GetValues(spreadsheetId, range);
 
-        return rawValues.SafeHasRows() 
+        return rawValues.SafeHasRows()
             ? _mapper.Map<IList<T>>(rawValues)
             : new List<T>();
     }
