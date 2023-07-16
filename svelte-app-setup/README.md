@@ -12,9 +12,20 @@ This template should help get you started developing with Svelte and TypeScript 
 ### Add Dependency Injection Support
 1. Run `npm install inversify reflect-metadata`
 2. Setup inversify IoC test
-3. Run `npm run dev` to verify app is integrated successfully
+3. Run `npm run dev` to verify inversify is integrated successfully
 4. Add `"experimentalDecorators": true` to `tsconfig.json` to fix typescript linting issues 
-5. Run `npm run dev` to verify app is integrated successfully
+5. Run `npm run dev` to verify typescript is updated successfully
+
+### Add Tailwind Support
+1. Follow `https://tailwindcss.com/docs/guides/sveltekit`
+   1. Install Tailwind by running `npm install -D tailwindcss postcss autoprefixer && npx tailwindcss init -p`
+   2. Enable use of PostCSS in `<style>` blocks
+   3. Configure Template Paths
+   4. Add Tailwind Directive to `app.css`
+      1. Configure VS Code to use `tailwindcss` language model to remove warnings
+   5. Replace all existing styles with Tailwind Hello World styles
+   6. Run `npm run dev` to verify tailwind is integrated successfully
+
 
 ## Recommended IDE Setup
 
