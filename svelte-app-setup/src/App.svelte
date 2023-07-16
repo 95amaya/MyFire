@@ -1,17 +1,17 @@
 <script lang="ts">
   console.log("App: starting...");
-  import svelteLogo from "./assets/svelte.svg";
-  import viteLogo from "/vite.svg";
-  import Counter from "./lib/Counter.svelte";
+  import Card from "./components/Card.svelte";
+  import Counter from "./components/Counter.svelte";
   console.log("App: finished loading.");
 </script>
 
 <main>
-  <h1 class="text-3xl font-bold underline">Hello world From Tailwind!</h1>
+  <div class="bg-gray-500 flex flex-col h-screen">
+    <div class="flex-1 w-full text-lg h-full shadow-lg bg-gray-300">
+      <Card>
+        <span slot="card-title">Income Statement</span>
+        <Counter slot="card-body" />
+      </Card>
+    </div>
+  </div>
 </main>
-
-<style lang="postcss">
-  :global(html) {
-    background-color: theme(colors.gray.100);
-  }
-</style>

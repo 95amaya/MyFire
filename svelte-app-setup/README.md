@@ -17,15 +17,20 @@ This template should help get you started developing with Svelte and TypeScript 
 5. Run `npm run dev` to verify typescript is updated successfully
 
 ### Add Tailwind Support
-1. Follow `https://tailwindcss.com/docs/guides/sveltekit`
-   1. Install Tailwind by running `npm install -D tailwindcss postcss autoprefixer && npx tailwindcss init -p`
-   2. Enable use of PostCSS in `<style>` blocks
-   3. Configure Template Paths
-   4. Add Tailwind Directive to `app.css`
-      1. Configure VS Code to use `tailwindcss` language model to remove warnings
-   5. Replace all existing styles with Tailwind Hello World styles
-   6. Run `npm run dev` to verify tailwind is integrated successfully
+Follow `https://tailwindcss.com/docs/guides/sveltekit`
+1. Install Tailwind by running `npm install -D tailwindcss postcss autoprefixer && npx tailwindcss init -p`
+2. Enable use of PostCSS in `<style>` blocks
+3. Configure Template Paths
+4. Add Tailwind Directive to `app.css`
+   1. Configure VS Code to use `tailwindcss` language model to remove warnings
+5. Replace all existing styles with Tailwind Hello World styles
+6. Run `npm run dev` to verify tailwind is integrated successfully
 
+### Add DaisyUI Support
+1. Follow `https://daisyui.com/docs/install/`
+2. Add Themes with `https://daisyui.com/docs/themes/`
+3. Update App to use daisyui css selectors
+4. Run `npm run dev` to verify daisyui is integrated successfully
 
 ## Recommended IDE Setup
 
