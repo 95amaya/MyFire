@@ -32,6 +32,11 @@ Follow `https://tailwindcss.com/docs/guides/sveltekit`
 3. Update App to use daisyui css selectors
 4. Run `npm run dev` to verify daisyui is integrated successfully
 
+### Add HighCharts Support
+1. Follow `https://www.npmjs.com/package/highcharts`
+2. Follow `https://svelte.dev/repl/d283589caa554badb16644ad40682802?version=3.38.2` for Hello World
+3. Run `npm run dev` to verify daisyui is integrated successfully
+
 ## Recommended IDE Setup
 
 [VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
