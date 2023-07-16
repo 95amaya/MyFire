@@ -9,6 +9,13 @@ This template should help get you started developing with Svelte and TypeScript 
 3. `npm install && npm run dev` to install packages and run app
 4. Verify this works in browser 
 
+### Add Dependency Injection Support
+1. Run `npm install inversify reflect-metadata`
+2. Setup inversify IoC test
+3. Run `npm run dev` to verify app is integrated successfully
+4. Add `"experimentalDecorators": true` to `tsconfig.json` to fix typescript linting issues 
+5. Run `npm run dev` to verify app is integrated successfully
+
 ## Recommended IDE Setup
 
 [VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
