@@ -3,10 +3,9 @@ import "./app.css";
 import "./startup";
 // start
 import { myContainer } from "./startup";
-import { TYPES } from "./models/types";
-import * as Interfaces from "./models/interfaces";
+import { TYPES } from "./types";
 
-const parentTest = myContainer.get<Interfaces.IParentTest>(TYPES.IParentTest);
+const parentTest = myContainer.get<IParentTest>(TYPES.IParentTest);
 console.log(parentTest.sayHello());
 
 // done

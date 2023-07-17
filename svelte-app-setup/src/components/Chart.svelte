@@ -1,65 +1,100 @@
 <script lang="ts">
-  import highcharts from "../services/highcharts.config";
+  // import DrawChartDirective from "../services/chart.directive";
+  import { myContainer } from "../startup";
   import * as HighCharts from "highcharts";
+  import { TYPES } from "../types";
+  const chartDirective = myContainer.get<IChartDirective>(
+    TYPES.IChartDirective
+  );
 
+  console.log("Loading chart...");
   let config: HighCharts.Options = {
+    chart: {
+      type: "column",
+    },
+
     title: {
-      text: "Solar Employment Growth by Sector, 2010-2016",
-    },
-
-    subtitle: {
-      text: "Source: thesolarfoundation.com",
-    },
-
-    yAxis: {
-      title: {
-        text: "Number of Employees",
-      },
+      text: "Income Statement Grouped by Time Period",
+      align: "left",
     },
 
     xAxis: {
-      accessibility: {
-        rangeDescription: "Range: 2010 to 2017",
+      categories: [
+        "Previous Month",
+        "Past 3 Months",
+        "Past 6 Months",
+        "Past Year",
+      ],
+    },
+
+    yAxis: {
+      allowDecimals: false,
+      min: 0,
+      title: {
+        text: "Currency (USD)",
       },
+    },
+
+    tooltip: {
+      format:
+        "<b>{key}</b><br/>{series.name}: {y}<br/>" +
+        "Total: {point.stackTotal}",
     },
 
     legend: {
       layout: "vertical",
       align: "right",
-      verticalAlign: "middle",
+      verticalAlign: "top",
     },
 
     plotOptions: {
-      series: {
-        label: {
-          connectorAllowed: false,
-        },
-        pointStart: 2010,
+      column: {
+        stacking: "percent", //"normal",  // TODO: Can we do a % based?
       },
     },
 
     series: [
       {
-        name: "Installation",
-        data: [43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175],
+        name: "Income - Michael", // Category Name
+        data: [148, 133, 124, 99], // Data array
+        stack: "Income", // Category Group Enum
       },
       {
-        name: "Manufacturing",
-        data: [24916, 24064, 29742, 29851, 32490, 30282, 38121, 40434],
+        name: "Income - Stephanie",
+        data: [102, 98, 65, 50],
+        stack: "Income",
       },
       {
-        name: "Sales & Distribution",
-        data: [11744, 17722, 16005, 19771, 20185, 24377, 32147, 39387],
+        name: "Income - Investing",
+        data: [113, 122, 95, 60],
+        stack: "Income",
       },
       {
-        name: "Project Development",
-        data: [null, null, 7988, 12169, 15112, 22452, 34400, 34227],
+        name: "Income - Other",
+        data: [113, 122, 95, 60],
+        stack: "Income",
       },
       {
-        name: "Other",
-        data: [12908, 5948, 8105, 11248, 8989, 11816, 18274, 18111],
+        name: "Spending - Needs",
+        data: [77, 72, 80, 75],
+        stack: "Spending",
       },
-    ] as Array<HighCharts.SeriesLineOptions>,
+      {
+        name: "Spending - Wants",
+        data: [77, 72, 80, 75],
+        stack: "Spending",
+      },
+      {
+        name: "Spending - Passive",
+        data: [77, 72, 80, 75],
+        stack: "Spending",
+      },
+      {
+        name: "Savings",
+        data: [77, 72, 80, 75],
+        stack: "Saving",
+      },
+    ] as Array<HighCharts.SeriesColumnOptions>,
 
     responsive: {
       rules: [
@@ -80,14 +115,20 @@
   };
 
   function generateNewData() {
-    // TODO: Fix TS Support for this
-    // const newData = config.series[0].data.map((data) =>
-    //   Math.round(Math.random() * 100000)
-    // );
-    // config.series[0].data = newData;
+    // let newSeries = [];
+    // config.series.forEach((seri) => {
+    //   console.log("generating new data for: ", seri.name);
+    //   const newData = seri.data.map((data) => Math.round(Math.random() * 100));
+    //   newSeries.push({
+    //     name: seri.name,
+    //     data: newData,
+    //   });
+    // });
+    // config.series = newSeries;
   }
 </script>
 
-<div class="chart" use:highcharts={config} />
+<!-- <div class="chart" use:DrawChartDirective={config} /> -->
+<div class="chart" use:chartDirective.Render={config} />
 
-<button on:click={generateNewData}> Randomize Data </button>
+<button class="btn" on:click={generateNewData}> Randomize Data </button>

@@ -3,6 +3,8 @@
 const TYPES = {
   IChildTest: Symbol.for("IChildTest"),
   IParentTest: Symbol.for("IParentTest"),
+  IChartFactory: Symbol.for("IChartFactory"),
+  IChartDirective: Symbol.for("IChartDirective"),
 };
 
 export { TYPES };

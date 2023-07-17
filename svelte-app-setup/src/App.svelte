@@ -14,6 +14,11 @@
         <!-- <Counter slot="card-body" /> -->
         <Chart slot="card-body" />
       </Card>
+      <Card>
+        <span slot="card-title">Income Statement 2</span>
+        <!-- <Counter slot="card-body" /> -->
+        <Chart slot="card-body" />
+      </Card>
     </div>
   </div>
 </main>
