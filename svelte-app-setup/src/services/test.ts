@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify";
 import "reflect-metadata";
-import { TYPES } from "../types";
+import TYPES from "../types";
 
 @injectable()
 class ChildTest implements IChildTest {

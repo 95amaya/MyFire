@@ -1,13 +1,13 @@
 <script lang="ts">
-  // import DrawChartDirective from "../services/chart.directive";
-  import { myContainer } from "../startup";
   import * as HighCharts from "highcharts";
-  import { TYPES } from "../types";
-  const chartDirective = myContainer.get<IChartDirective>(
-    TYPES.IChartDirective
-  );
+  export let chartDirective: IChartDirective;
 
-  console.log("Loading chart...");
+  // Pure DI
+  // import { HighchartDirective } from "../services/chart/highchart.directive";
+  // import { HighchartFactory } from "../services/chart/highchart.factory";
+  // const chartDirective = new HighchartDirective(new HighchartFactory());
+
+  // console.log("Loading chart...");
   let config: HighCharts.Options = {
     chart: {
       type: "column",

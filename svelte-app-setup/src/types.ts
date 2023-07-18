@@ -5,6 +5,7 @@ const TYPES = {
   IParentTest: Symbol.for("IParentTest"),
   IChartFactory: Symbol.for("IChartFactory"),
   IChartDirective: Symbol.for("IChartDirective"),
+  IFactoryOfIChartDirective: Symbol("IFactory<IChartDirective>"),
 };
 
-export { TYPES };
+export default TYPES;

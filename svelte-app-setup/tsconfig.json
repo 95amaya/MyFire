@@ -18,6 +18,7 @@
     "experimentalDecorators": true,
     "typeRoots": [
       "./types",
+      // "./node_modules/inversify/lib/interfaces"
     ],
   },
   "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte", "src/services/test.ts"],

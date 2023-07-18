@@ -1,8 +1,8 @@
 import { injectable, inject } from "inversify";
 import "reflect-metadata";
-import { TYPES } from "../../types";
 import * as Highcharts from "highcharts";
 import type { ActionReturn } from "svelte/action";
+import TYPES from "../../types";
 
 @injectable()
 class HighchartDirective implements IChartDirective {
@@ -11,6 +11,7 @@ class HighchartDirective implements IChartDirective {
   public constructor(
     @inject(TYPES.IChartFactory) private highchartFactory: IChartFactory
   ) {
+    console.log("HighchartDirective Instantiating...");
     this._chartFactory = highchartFactory;
   }
 
@@ -18,7 +19,7 @@ class HighchartDirective implements IChartDirective {
     node: string | HTMLElement,
     config: Highcharts.Options
   ): ActionReturn<Highcharts.Options> => {
-    console.log("render...", node, config);
+    // console.log("render...", node, config);
     const redraw = true;
     const oneToOne = true;
     const chart = this._chartFactory.Build(node, config);
