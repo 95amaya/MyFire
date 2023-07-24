@@ -1,28 +1,27 @@
 import { injectable, inject } from "inversify";
 import "reflect-metadata";
-import * as Highcharts from "highcharts";
-import type { ActionReturn } from "svelte/action";
-import TYPES from "../../types";
+import TYPES from "../../runtime.types";
+import type { ActionReturn } from "../../types";
 
 @injectable()
-class HighchartDirective implements IChartDirective {
-  private _chartFactory: IChartFactory;
+export class HighchartDirective implements IChartDirective {
+  private _chartBuilder: IChartBuilder;
 
   public constructor(
-    @inject(TYPES.IChartFactory) private highchartFactory: IChartFactory
+    @inject(TYPES.IChartBuilder) private highchartBuilder: IChartBuilder
   ) {
     console.log("HighchartDirective Instantiating...");
-    this._chartFactory = highchartFactory;
+    this._chartBuilder = highchartBuilder;
   }
 
-  Render = (
+  public Render = (
     node: string | HTMLElement,
     config: Highcharts.Options
   ): ActionReturn<Highcharts.Options> => {
     // console.log("render...", node, config);
     const redraw = true;
     const oneToOne = true;
-    const chart = this._chartFactory.Build(node, config);
+    const chart = this._chartBuilder.Build(node, config);
 
     return {
       update(config) {
@@ -34,5 +33,3 @@ class HighchartDirective implements IChartDirective {
     };
   };
 }
-
-export { HighchartDirective };

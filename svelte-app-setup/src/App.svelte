@@ -1,26 +1,23 @@
 <script lang="ts">
   // console.log("App: starting...");
+  import type { inversify } from "./types";
+
   import Card from "./components/Card.svelte";
   import Counter from "./components/Counter.svelte";
   import Chart from "./components/Chart.svelte";
-  import container from "./inversify.config";
-  import TYPES from "./types";
-  import type { interfaces } from "inversify";
-
-  // Test Prop Passing
-  export let test: string;
-  console.log(test);
 
   // inject chart directive factory into app to instantiate these
-  // GOOD
-  export let chartDirectiveFactory: interfaces.Factory<IChartDirective>;
-  const chartDirective1 = chartDirectiveFactory() as IChartDirective;
-  const chartDirective2 = chartDirectiveFactory() as IChartDirective;
+  export let chartDirectiveFactory: inversify.SimpleFactory<
+    IChartDirective,
+    null[]
+  >;
 
-  // BAD
-  // const chartDirective1 = container.get<IChartDirective>(TYPES.IChartDirective);
-  // const chartDirective2 = container.get<IChartDirective>(TYPES.IChartDirective);
-  // console.log("App: finished loading.");
+  export let chartConfigBuilder: IChartConfigBuilder;
+
+  let incomeChartProps = <IChartProps>{
+    chartDirective: chartDirectiveFactory(),
+    chartConfigBuilder: chartConfigBuilder,
+  };
 </script>
 
 <main>
@@ -29,13 +26,12 @@
       <Card>
         <span slot="card-title">Income Statement</span>
         <!-- <Counter slot="card-body" /> -->
-        <Chart chartDirective={chartDirective1} slot="card-body" />
+        <Chart {...incomeChartProps} slot="card-body" />
       </Card>
-      <Card>
+      <!-- <Card>
         <span slot="card-title">Income Statement 2</span>
-        <!-- <Counter slot="card-body" /> -->
-        <Chart chartDirective={chartDirective2} slot="card-body" />
-      </Card>
+        <Chart chartDirective={spendingChartDirective} slot="card-body" />
+      </Card> -->
     </div>
   </div>
 </main>

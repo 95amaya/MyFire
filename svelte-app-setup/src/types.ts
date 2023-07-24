@@ -1,11 +1,11 @@
-// Define type identifiers for runtime dependency mapping
+// for more info reference: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-8.html
+// for more info reference: https://www.typescriptlang.org/docs/handbook/namespaces-and-modules.html
 
-const TYPES = {
-  IChildTest: Symbol.for("IChildTest"),
-  IParentTest: Symbol.for("IParentTest"),
-  IChartFactory: Symbol.for("IChartFactory"),
-  IChartDirective: Symbol.for("IChartDirective"),
-  IFactoryOfIChartDirective: Symbol("IFactory<IChartDirective>"),
-};
+import { type interfaces as inversify } from "inversify";
+export type { inversify };
 
-export default TYPES;
+import * as highcharts from "highcharts";
+export type { highcharts };
+
+import type { ActionReturn } from "svelte/action";
+export type { ActionReturn };

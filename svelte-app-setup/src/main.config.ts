@@ -1,12 +1,16 @@
-import type { interfaces } from "inversify";
 import container from "./inversify.config";
-import TYPES from "./types";
+import TYPES from "./runtime.types";
+import type { inversify } from "./types";
 
-let chartDirectiveFactory = container.get<interfaces.Factory<IChartDirective>>(
-  TYPES.IFactoryOfIChartDirective
+const chartDirectiveFactory = container.get<
+  inversify.SimpleFactory<IChartDirective, null[]>
+>(TYPES.IFactoryOfIChartDirective);
+
+const chartConfigBuilder = container.get<IChartConfigBuilder>(
+  TYPES.IChartConfigBuilder
 );
 
-export { chartDirectiveFactory };
+export { chartDirectiveFactory, chartConfigBuilder };
 
 // Hello World Text Example
 // const parentTest = container.get<IParentTest>(TYPES.IParentTest);
