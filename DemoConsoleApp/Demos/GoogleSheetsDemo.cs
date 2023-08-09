@@ -17,15 +17,15 @@ public static class GoogleSheetsDemo
         var service = Helper.InitializeSheetService(ApplicationName, Scopes);
 
         // Define request parameters.
-        String spreadsheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms";
-        String range = "Class Data!A2:E";
+        string spreadsheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms";
+        string range = "Class Data!A2:E";
         SpreadsheetsResource.ValuesResource.GetRequest request =
                 service.Spreadsheets.Values.Get(spreadsheetId, range);
 
         // Prints the names and majors of students in a sample spreadsheet:
         // https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
         ValueRange response = request.Execute();
-        IList<IList<Object>> values = response.Values;
+        IList<IList<object>> values = response.Values;
 
         if (values != null && values.Count > 0)
         {

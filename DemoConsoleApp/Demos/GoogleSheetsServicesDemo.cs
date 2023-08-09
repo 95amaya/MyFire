@@ -41,7 +41,7 @@ public static class GoogleSheetsServicesDemo
     {
         var config = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<IList<Object>, Student>()
+            cfg.CreateMap<IList<object>, Student>()
                 .ForMember(dest => dest.FirstName, act => act.MapFrom(src => src[0]))
                 .ForMember(dest => dest.Sex, act => act.MapFrom(src => src[1]))
                 .ForMember(dest => dest.Class, act => act.MapFrom(src => src[2]))

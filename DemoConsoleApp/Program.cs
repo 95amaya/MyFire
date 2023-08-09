@@ -11,8 +11,7 @@ class Program
         var secrets = Helper.ReadFromJson("secrets.json");
         // GoogleSheetsDemo.Run(args);
         // GoogleSheetsServicesDemo.Run(args);
-        // MyFireDemo.Run(args, secrets);
-        MyFireLoadDataDemo.Run(args, secrets);
+        MyFireDemo.Run(args, secrets);
 
         // -- Create Google Sheet 
         // var googleSheetsApiService = NewSheetService();

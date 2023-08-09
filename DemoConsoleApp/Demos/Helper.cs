@@ -41,28 +41,24 @@ public static class Helper
 
     public static Secrets ReadFromJson(string path)
     {
-        using (StreamReader file = new StreamReader(path))
+        using StreamReader file = new(path);
+        try
         {
-            try
-            {
-                string json = file.ReadToEnd();
-
-                return JsonConvert.DeserializeObject<Secrets>(json);
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("Problem reading file");
-
-                return null;
-            }
+            string json = file.ReadToEnd();
+            return JsonConvert.DeserializeObject<Secrets>(json);
+        }
+        catch (Exception)
+        {
+            Console.WriteLine("Problem reading file");
+            return null;
         }
     }
 
-    public static void WriteToJson(string path, Object obj)
+    public static void WriteToJson(string path, object obj)
     {
         var jsonObj = JsonConvert.SerializeObject(obj);
 
-        using StreamWriter file = new StreamWriter(path);
+        using StreamWriter file = new(path);
         try
         {
             file.Write(jsonObj);

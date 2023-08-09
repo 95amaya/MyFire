@@ -11,7 +11,7 @@ public class GoogleSheetClient : ISheetClient
         _googleSheetsApiClient = googleSheetsApiClient;
     }
 
-    public IList<IList<Object>> GetValues(string spreadsheetId, string range)
+    public IList<IList<object>> GetValues(string spreadsheetId, string range)
     {
         var request = _googleSheetsApiClient.Spreadsheets.Values.Get(spreadsheetId, range);
         var response = request.Execute();

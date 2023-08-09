@@ -26,18 +26,18 @@ public static class MyFireDemo
         // Create Reader 
         var googleSheetReader = new GoogleSheetReader(_mapper, new GoogleSheetClient(googleSheetApiClient));
 
-        var needsCheckingTransactions = googleSheetReader.ReadFrom<WfBillTransaction>(secrets.SheetId, secrets.NeedsCheckingTransactionRange);
-        var wantsCheckingTransactions = googleSheetReader.ReadFrom<WfBillTransaction>(secrets.SheetId, secrets.WantsCheckingTransactionRange);
-        var needsCardTransactions = googleSheetReader.ReadFrom<WfBillTransaction>(secrets.SheetId, secrets.NeedsCardTransactionRange);
-        var wantsCardTransactions = googleSheetReader.ReadFrom<JpmBillTransaction>(secrets.SheetId, secrets.WantsCardTransactionRange);
+        var needsCheckingTransactions = googleSheetReader.ReadFrom<WfNeedsCheckingBillTransaction>(secrets.SheetId, secrets.NeedsCheckingTransactionRange);
+        var wantsCheckingTransactions = googleSheetReader.ReadFrom<WfWantsCheckingBillTransaction>(secrets.SheetId, secrets.WantsCheckingTransactionRange);
+        var needsCardTransactions = googleSheetReader.ReadFrom<WfNeedsCardBillTransaction>(secrets.SheetId, secrets.NeedsCardTransactionRange);
+        var wantsCardTransactions = googleSheetReader.ReadFrom<JpmWantsCardBillTransaction>(secrets.SheetId, secrets.WantsCardTransactionRange);
 
         // Prints my transactions from spreadsheet
-        printSampleOfDataSet("NEEDS CHECKING Sample", needsCheckingTransactions.Cast<BillTransaction>());
-        printSampleOfDataSet("WANTS CHECKING Sample", wantsCheckingTransactions.Cast<BillTransaction>());
-        printSampleOfDataSet("NEEDS CARD Sample", needsCardTransactions.Cast<BillTransaction>());
-        printSampleOfDataSet("WANTS CARD Sample", wantsCardTransactions.Cast<BillTransaction>());
+        PrintSampleOfDataSet("NEEDS CHECKING Sample", needsCheckingTransactions.Cast<BillTransaction>());
+        PrintSampleOfDataSet("WANTS CHECKING Sample", wantsCheckingTransactions.Cast<BillTransaction>());
+        PrintSampleOfDataSet("NEEDS CARD Sample", needsCardTransactions.Cast<BillTransaction>());
+        PrintSampleOfDataSet("WANTS CARD Sample", wantsCardTransactions.Cast<BillTransaction>());
 
-        transactionList.AddRange(needsCardTransactions);
+        transactionList.AddRange(needsCheckingTransactions);
         transactionList.AddRange(wantsCheckingTransactions);
         transactionList.AddRange(needsCardTransactions);
         transactionList.AddRange(wantsCardTransactions);
@@ -49,22 +49,32 @@ public static class MyFireDemo
     {
         var config = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<IList<Object>, WfBillTransaction>()
+            cfg.CreateMap<IList<object>, WfBillTransaction>()
                 .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => src[0]))
                 .ForMember(dest => dest.Amount, act => act.MapFrom(src => src[1]))
                 .ForMember(dest => dest.Description, act => act.MapFrom(src => src[4]));
 
-            cfg.CreateMap<IList<Object>, JpmBillTransaction>()
+            cfg.CreateMap<IList<object>, WfNeedsCheckingBillTransaction>()
+                .IncludeBase<IList<object>, WfBillTransaction>();
+            cfg.CreateMap<IList<object>, WfWantsCheckingBillTransaction>()
+                .IncludeBase<IList<object>, WfBillTransaction>();
+            cfg.CreateMap<IList<object>, WfNeedsCardBillTransaction>()
+                .IncludeBase<IList<object>, WfBillTransaction>();
+
+            cfg.CreateMap<IList<object>, JpmBillTransaction>()
                 .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => src[0]))
                 .ForMember(dest => dest.Amount, act => act.MapFrom(src => src[5]))
                 .ForMember(dest => dest.Description, act => act.MapFrom(src => src[2]));
+
+            cfg.CreateMap<IList<object>, JpmWantsCardBillTransaction>()
+                .IncludeBase<IList<object>, JpmBillTransaction>();
         });
         return config.CreateMapper();
     }
 
-    private static void printSampleOfDataSet(string title, IEnumerable<BillTransaction> transactions)
+    private static void PrintSampleOfDataSet(string title, IEnumerable<BillTransaction> transactions)
     {
-        Console.WriteLine(title);
+        Console.WriteLine($"{title}, Count: {transactions.Count()}");
         foreach (var transaction in transactions.Take(5))
         {
             Console.WriteLine(transaction);
