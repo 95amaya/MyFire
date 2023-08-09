@@ -8,10 +8,11 @@ class Program
     {
         Console.WriteLine("Hello World!");
 
-        var secrets = DemoHelper.ReadFromJson("secrets.json");
+        var secrets = Helper.ReadFromJson("secrets.json");
         // GoogleSheetsDemo.Run(args);
         // GoogleSheetsServicesDemo.Run(args);
-        MyFireDemo.Run(args, secrets);
+        // MyFireDemo.Run(args, secrets);
+        MyFireLoadDataDemo.Run(args, secrets);
 
         // -- Create Google Sheet 
         // var googleSheetsApiService = NewSheetService();

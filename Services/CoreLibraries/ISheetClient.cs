@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MyFireCoreLibraries;
+namespace CoreLibraries;
 
 public interface ISheetClient
 {

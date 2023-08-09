@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace Demo;
 
-public static class DemoHelper
+public static class Helper
 {
     public static SheetsService InitializeSheetService(string appName, string[] scopes)
     {

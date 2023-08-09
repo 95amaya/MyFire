@@ -14,7 +14,7 @@ public static class GoogleSheetsDemo
     public static void Run(string[] args)
     {
         // Create Google Sheets API service.
-        var service = DemoHelper.InitializeSheetService(ApplicationName, Scopes);
+        var service = Helper.InitializeSheetService(ApplicationName, Scopes);
 
         // Define request parameters.
         String spreadsheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms";

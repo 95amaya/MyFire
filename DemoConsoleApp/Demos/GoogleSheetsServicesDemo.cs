@@ -1,7 +1,7 @@
 using AutoMapper;
 using Google.Apis.Sheets.v4;
 using MyFireConsoleApp.Models;
-using MyFireCoreLibraries;
+using CoreLibraries;
 using System;
 using System.Collections.Generic;
 
@@ -18,14 +18,14 @@ public static class GoogleSheetsServicesDemo
         var _mapper = InitializeAutomapper();
 
         // Create Google Sheets API service.
-        var googleSheetApiClient = DemoHelper.InitializeSheetService(ApplicationName, Scopes);
+        var googleSheetApiClient = Helper.InitializeSheetService(ApplicationName, Scopes);
 
         // Create Reader 
         var googleSheetReader = new GoogleSheetReader(_mapper, new GoogleSheetClient(googleSheetApiClient));
 
         // Define request parameters.
-        String spreadsheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms";
-        String range = "Class Data!A2:E";
+        string spreadsheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms";
+        string range = "Class Data!A2:E";
 
         var students = googleSheetReader.ReadFrom<Student>(spreadsheetId, range);
 

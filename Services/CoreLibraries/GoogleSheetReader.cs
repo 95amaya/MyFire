@@ -1,6 +1,6 @@
 using AutoMapper;
 
-namespace MyFireCoreLibraries;
+namespace CoreLibraries;
 
 public class GoogleSheetReader : ISheetReader
 {

@@ -1,15 +1,15 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyFireConsoleApp", "MyFireConsoleApp\MyFireConsoleApp.csproj", "{5DEAA397-48F5-4527-B74C-19B36B23CAC9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoConsoleApp", "DemoConsoleApp\DemoConsoleApp.csproj", "{5DEAA397-48F5-4527-B74C-19B36B23CAC9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyFireCoreLibraries", "MyFireCoreLibraries\MyFireCoreLibraries.csproj", "{6CEC2D90-F24E-44EC-B4EE-24A255A5A261}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Services\Services.csproj", "{6CEC2D90-F24E-44EC-B4EE-24A255A5A261}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyFireCoreLibraries.Tests", "MyFireCoreLibraries.Tests\MyFireCoreLibraries.Tests.csproj", "{3570EB76-8ECA-472C-B667-8597F450FA23}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services.Tests", "Services.Tests\Services.Tests.csproj", "{3570EB76-8ECA-472C-B667-8597F450FA23}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyFireWebApp", "MyFireWebApp\MyFireWebApp.csproj", "{5CAB6E66-9358-421F-AECA-ED9845921406}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp", "WebApp\WebApp.csproj", "{5CAB6E66-9358-421F-AECA-ED9845921406}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

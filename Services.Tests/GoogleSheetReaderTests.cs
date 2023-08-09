@@ -2,9 +2,9 @@ using AutoMapper;
 using Bogus;
 using FluentAssertions;
 using Moq;
-using MyFireCoreLibraries;
+using CoreLibraries;
 
-namespace MyFireCoreLibrariesTests;
+namespace CoreLibrariesTests;
 
 public class GoogleSheetReaderTests
 {
@@ -35,13 +35,13 @@ public class GoogleSheetReaderTests
         {
             new List<Object>()
         };
-        
+
 
         _mockMapper.Setup(mapper => mapper.Map<IList<TestClass>>(It.IsAny<IList<IList<Object>>>()))
             .Returns(expectedDataList);
         _mockSheetClient.Setup(sheetClient => sheetClient.GetValues(It.IsAny<string>(), It.IsAny<string>()))
             .Returns(rawData);
-        
+
         var googleSheetReader = new GoogleSheetReader(_mockMapper.Object, _mockSheetClient.Object);
 
         // act
@@ -50,7 +50,7 @@ public class GoogleSheetReaderTests
         // assert
         data.Should().Equal(expectedDataList);
     }
-    
+
     [Fact]
     public void ShouldNotReturnData()
     {
@@ -66,12 +66,12 @@ public class GoogleSheetReaderTests
         };
 
         var rawData = new List<IList<Object>>();
-        
+
         _mockMapper.Setup(mapper => mapper.Map<IList<TestClass>>(It.IsAny<IList<IList<Object>>>()))
             .Returns(expectedDataList);
         _mockSheetClient.Setup(sheetClient => sheetClient.GetValues(It.IsAny<string>(), It.IsAny<string>()))
             .Returns(rawData);
-        
+
         var googleSheetReader = new GoogleSheetReader(_mockMapper.Object, _mockSheetClient.Object);
 
         // act
@@ -81,5 +81,5 @@ public class GoogleSheetReaderTests
         data.Should().BeEmpty();
     }
 
-    public class TestClass {}
+    public class TestClass { }
 }

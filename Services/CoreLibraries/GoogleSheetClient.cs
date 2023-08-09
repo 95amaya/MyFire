@@ -1,6 +1,6 @@
 using Google.Apis.Sheets.v4;
 
-namespace MyFireCoreLibraries;
+namespace CoreLibraries;
 
 public class GoogleSheetClient : ISheetClient
 {

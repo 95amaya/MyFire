@@ -1,7 +1,7 @@
 using AutoMapper;
 using Google.Apis.Sheets.v4;
 using MyFireConsoleApp.Models;
-using MyFireCoreLibraries;
+using CoreLibraries;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -21,7 +21,7 @@ public static class MyFireDemo
         var _mapper = InitializeAutomapper();
 
         // Create Google Sheets API service.
-        var googleSheetApiClient = DemoHelper.InitializeSheetService(ApplicationName, Scopes);
+        var googleSheetApiClient = Helper.InitializeSheetService(ApplicationName, Scopes);
 
         // Create Reader 
         var googleSheetReader = new GoogleSheetReader(_mapper, new GoogleSheetClient(googleSheetApiClient));
