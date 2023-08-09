@@ -39,18 +39,19 @@ public static class Helper
         });
     }
 
-    public static Secrets ReadFromJson(string path)
+    public static T ReadFromJson<T>(string path)
+    where T : class, new()
     {
         using StreamReader file = new(path);
         try
         {
             string json = file.ReadToEnd();
-            return JsonConvert.DeserializeObject<Secrets>(json);
+            return JsonConvert.DeserializeObject<T>(json);
         }
         catch (Exception)
         {
             Console.WriteLine("Problem reading file");
-            return null;
+            return new T();
         }
     }
 

@@ -17,32 +17,50 @@ public static class MyFireDemo
 
     public static void Run(string[] args, Secrets secrets)
     {
-        var transactionList = new List<BillTransaction>();
         var _mapper = InitializeAutomapper();
-
         // Create Google Sheets API service.
         var googleSheetApiClient = Helper.InitializeSheetService(ApplicationName, Scopes);
 
         // Create Reader 
         var googleSheetReader = new GoogleSheetReader(_mapper, new GoogleSheetClient(googleSheetApiClient));
 
-        var needsCheckingTransactions = googleSheetReader.ReadFrom<WfNeedsCheckingBillTransaction>(secrets.SheetId, secrets.NeedsCheckingTransactionRange);
-        var wantsCheckingTransactions = googleSheetReader.ReadFrom<WfWantsCheckingBillTransaction>(secrets.SheetId, secrets.WantsCheckingTransactionRange);
-        var needsCardTransactions = googleSheetReader.ReadFrom<WfNeedsCardBillTransaction>(secrets.SheetId, secrets.NeedsCardTransactionRange);
-        var wantsCardTransactions = googleSheetReader.ReadFrom<JpmWantsCardBillTransaction>(secrets.SheetId, secrets.WantsCardTransactionRange);
+        GetTransactions(secrets, googleSheetReader);
 
-        // Prints my transactions from spreadsheet
-        PrintSampleOfDataSet("NEEDS CHECKING Sample", needsCheckingTransactions.Cast<BillTransaction>());
-        PrintSampleOfDataSet("WANTS CHECKING Sample", wantsCheckingTransactions.Cast<BillTransaction>());
-        PrintSampleOfDataSet("NEEDS CARD Sample", needsCardTransactions.Cast<BillTransaction>());
-        PrintSampleOfDataSet("WANTS CARD Sample", wantsCardTransactions.Cast<BillTransaction>());
+    }
 
-        transactionList.AddRange(needsCheckingTransactions);
-        transactionList.AddRange(wantsCheckingTransactions);
-        transactionList.AddRange(needsCardTransactions);
-        transactionList.AddRange(wantsCardTransactions);
+    private static List<BillTransaction> GetTransactions(Secrets secrets, GoogleSheetReader googleSheetReader)
+    {
+        var transactionList = new List<BillTransaction>();
 
-        Console.WriteLine($"Total Bill Transactions: {transactionList.Count()}");
+        if (googleSheetReader == null)
+        {
+            // read from file
+            return Helper.ReadFromJson<List<BillTransaction>>(secrets.FileWritePath);
+        }
+        else
+        {
+            // read from google sheet
+            var needsCheckingTransactions = googleSheetReader.ReadFrom<WfNeedsCheckingBillTransaction>(secrets.SheetId, secrets.NeedsCheckingTransactionRange);
+            var wantsCheckingTransactions = googleSheetReader.ReadFrom<WfWantsCheckingBillTransaction>(secrets.SheetId, secrets.WantsCheckingTransactionRange);
+            var needsCardTransactions = googleSheetReader.ReadFrom<WfNeedsCardBillTransaction>(secrets.SheetId, secrets.NeedsCardTransactionRange);
+            var wantsCardTransactions = googleSheetReader.ReadFrom<JpmWantsCardBillTransaction>(secrets.SheetId, secrets.WantsCardTransactionRange);
+
+            // Prints my transactions from spreadsheet
+            PrintSampleOfDataSet("NEEDS CHECKING Sample", needsCheckingTransactions.Cast<BillTransaction>());
+            PrintSampleOfDataSet("WANTS CHECKING Sample", wantsCheckingTransactions.Cast<BillTransaction>());
+            PrintSampleOfDataSet("NEEDS CARD Sample", needsCardTransactions.Cast<BillTransaction>());
+            PrintSampleOfDataSet("WANTS CARD Sample", wantsCardTransactions.Cast<BillTransaction>());
+
+            transactionList.AddRange(needsCheckingTransactions);
+            transactionList.AddRange(wantsCheckingTransactions);
+            transactionList.AddRange(needsCardTransactions);
+            transactionList.AddRange(wantsCardTransactions);
+
+            Helper.WriteToJson(secrets.FileWritePath, transactionList); // TODO: Fix File Path Write
+            Console.WriteLine($"Total Bill Transactions Written: {transactionList.Count()}");
+        }
+
+        return transactionList;
     }
 
     private static IMapper InitializeAutomapper()
