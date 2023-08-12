@@ -56,7 +56,7 @@ public static class MyFireDemo
             transactionList.AddRange(needsCardTransactions);
             transactionList.AddRange(wantsCardTransactions);
 
-            Helper.WriteToJson(secrets.FileWritePath, transactionList); // TODO: Fix File Path Write
+            // Helper.WriteToJson(secrets.FileWritePath, transactionList); // TODO: Fix File Path Write
             Console.WriteLine($"Total Bill Transactions Written: {transactionList.Count()}");
         }
 
