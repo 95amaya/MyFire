@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/MyFireConsoleApp/MyFireConsoleApp.csproj",
+                "${workspaceFolder}/DemoConsoleApp/DemoConsoleApp.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/MyFireConsoleApp/MyFireConsoleApp.csproj",
+                "${workspaceFolder}/DemoConsoleApp/DemoConsoleApp.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/MyFireConsoleApp/MyFireConsoleApp.csproj"
+                "${workspaceFolder}/DemoConsoleApp/DemoConsoleApp.csproj"
             ],
             "problemMatcher": "$msCompile"
         }

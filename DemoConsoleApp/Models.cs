@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace MyFireConsoleApp.Models;
 
@@ -18,12 +19,16 @@ public class Student
 
 public class Secrets
 {
+    public List<BillTransactionSheet> BillTransactionSheets { get; set; }
+}
+
+public class BillTransactionSheet
+{
     public string SheetId { get; set; }
     public string NeedsCheckingTransactionRange { get; set; }
     public string WantsCheckingTransactionRange { get; set; }
     public string NeedsCardTransactionRange { get; set; }
     public string WantsCardTransactionRange { get; set; }
-    public string FileWritePath { get; set; }
 }
 
 public enum TransactionCategory

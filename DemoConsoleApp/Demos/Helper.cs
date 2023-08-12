@@ -5,7 +5,6 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Util.Store;
-using MyFireConsoleApp.Models;
 using Newtonsoft.Json;
 
 namespace Demo;
@@ -17,11 +16,11 @@ public static class Helper
         UserCredential credential;
 
         using (var stream =
-            new FileStream("credentials.json", FileMode.Open, FileAccess.Read))
+            new FileStream("./DemoConsoleApp/credentials.json", FileMode.Open, FileAccess.Read))
         {
             // The file token.json stores the user's access and refresh tokens, and is created
             // automatically when the authorization flow completes for the first time.
-            string credPath = "token.json";
+            string credPath = "./DemoConsoleApp/token.json";
             credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                 GoogleClientSecrets.FromStream(stream).Secrets,
                 scopes,

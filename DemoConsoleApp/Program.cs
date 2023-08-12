@@ -6,9 +6,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Hello World!");
-
-        var secrets = Helper.ReadFromJson<Models.Secrets>("secrets.json");
+        var secrets = Helper.ReadFromJson<Models.Secrets>("./DemoConsoleApp/secrets.json");
         // GoogleSheetsDemo.Run(args);
         // GoogleSheetsServicesDemo.Run(args);
         MyFireDemo.Run(args, secrets);
