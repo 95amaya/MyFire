@@ -3,7 +3,7 @@ using Google.Apis.Sheets.v4.Data;
 using System;
 using System.Collections.Generic;
 
-namespace Demo;
+namespace DemoConsoleApp.Demos;
 public static class GoogleSheetsDemo
 {
     // If modifying these scopes, delete your previously saved credentials

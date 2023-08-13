@@ -1,11 +1,11 @@
 using AutoMapper;
 using Google.Apis.Sheets.v4;
-using MyFireConsoleApp.Models;
+using DemoConsoleApp.Models;
 using CoreLibraries;
 using System;
 using System.Collections.Generic;
 
-namespace Demo;
+namespace DemoConsoleApp.Demos;
 public static class GoogleSheetsServicesDemo
 {
     // If modifying these scopes, delete your previously saved credentials

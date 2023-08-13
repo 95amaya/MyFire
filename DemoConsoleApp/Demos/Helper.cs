@@ -7,7 +7,7 @@ using Google.Apis.Sheets.v4;
 using Google.Apis.Util.Store;
 using Newtonsoft.Json;
 
-namespace Demo;
+namespace DemoConsoleApp.Demos;
 
 public static class Helper
 {
@@ -42,16 +42,8 @@ public static class Helper
     where T : class, new()
     {
         using StreamReader file = new(path);
-        try
-        {
-            string json = file.ReadToEnd();
-            return JsonConvert.DeserializeObject<T>(json);
-        }
-        catch (Exception)
-        {
-            Console.WriteLine("Problem reading file");
-            return new T();
-        }
+        string json = file.ReadToEnd();
+        return JsonConvert.DeserializeObject<T>(json);
     }
 
     public static void WriteToJson(string path, object obj)
@@ -59,15 +51,7 @@ public static class Helper
         var jsonObj = JsonConvert.SerializeObject(obj);
 
         using StreamWriter file = new(path);
-        try
-        {
-            file.Write(jsonObj);
-        }
-        catch (Exception)
-        {
-            Console.WriteLine("Problem reading file");
-        }
-
+        file.Write(jsonObj);
     }
 
 }

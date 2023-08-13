@@ -1,7 +1,6 @@
-﻿using Demo;
-using System;
+﻿using DemoConsoleApp.Demos;
 
-namespace MyFireConsoleApp;
+namespace DemoConsoleApp;
 class Program
 {
     static void Main(string[] args)

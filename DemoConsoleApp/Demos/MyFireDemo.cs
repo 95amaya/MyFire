@@ -1,14 +1,16 @@
 using AutoMapper;
 using Google.Apis.Sheets.v4;
-using MyFireConsoleApp.Models;
+using DemoConsoleApp.Models;
 using CoreLibraries;
 using System;
 using System.Linq;
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
 using Dapper;
+using Dapper.Contrib.Extensions;
+using System.IO;
 
-namespace Demo;
+namespace DemoConsoleApp.Demos;
 public static class MyFireDemo
 {
     // If modifying these scopes, delete your previously saved credentials
@@ -20,20 +22,32 @@ public static class MyFireDemo
     public static void Run(string[] args, Secrets secrets)
     {
         var _mapper = InitializeAutomapper();
-        // Create Google Sheets API service.
-        var googleSheetApiClient = Helper.InitializeSheetService(ApplicationName, Scopes);
+        // Get From Sheet
+        // var googleSheetApiClient = Helper.InitializeSheetService(ApplicationName, Scopes);
+        // var googleSheetReader = new GoogleSheetReader(_mapper, new GoogleSheetClient(googleSheetApiClient));
+        // var billTransactions = GetBillTransactions(secrets.BillTransactionSheets.FirstOrDefault(), googleSheetReader);
 
-        // Create Reader 
-        var googleSheetReader = new GoogleSheetReader(_mapper, new GoogleSheetClient(googleSheetApiClient));
+        // Build output File Path
+        // var billTransactionsFilePath = Path.Combine(Directory.GetCurrentDirectory(), "DemoConsoleApp", "output", "output.json");
 
-        // GetBillTransactions(secrets.BillTransactionSheets.FirstOrDefault(), googleSheetReader);
-        var billTransactions = Helper.ReadFromJson<List<BillTransaction>>("./DemoConsoleApp/output/output.json");
-        Console.WriteLine($"Total Bill Transactions Read: {billTransactions.Count()}");
+        // write to file
+        // Helper.WriteToJson(billTransactionsFilePath, billTransactions);
+
+        // read from file
+        // var billTransactions = Helper.ReadFromJson<List<BillTransaction>>(billTransactionsFilePath);
+        // Console.WriteLine($"Total Bill Transactions Read: {billTransactions.Count()}");
 
         // Save Transactions to DB
         // https://medium.com/dapper-net/custom-columns-mapping-1cd45dfd51d6
         var connectionString = "Server=127.0.0.1;port=3306;Uid=root;Password=test_pass;Database=localdb";
         var sql = "SELECT CURDATE();";
+        IEnumerable<BillTransactionDbo> billTransactionDbos;
+
+        // billTransactionDbos = _mapper.Map<List<BillTransactionDbo>>(billTransactions);
+        // var testList = _mapper.Map<List<BillTransaction>>(billTransactionDbos);
+
+        // var billTransactionDbo = _mapper.Map<BillTransactionDbo>(billTransactions.FirstOrDefault());
+        // var billTransactionDbos = _mapper.Map<List<BillTransactionDbo>>(billTransactions);
 
         // dbconnection manager
         using (var connection = new MySqlConnection(connectionString))
@@ -41,10 +55,26 @@ public static class MyFireDemo
             // connection.Open();
             var retVal = connection.QueryFirstOrDefault<DateTime>(sql);
             Console.WriteLine($"Mysql Connection Test Output: {retVal}");
-        }
-    }
 
-    // TODO: GetBillTransactions should only take 1 sheet at a time 
+            // bulk insert into DB
+            // var count = connection.Insert(billTransactionDbos);
+            // Console.WriteLine($"Total Inserts: {count}");
+
+            // read from DB
+            // billTransactionDbos = connection.GetAll<BillTransactionDbo>();
+
+            billTransactionDbos = connection.Query<BillTransactionDbo>(@"
+                select * from bill_transactions
+                where
+                    transaction_type = @foo
+            ;", new { foo = TransactionType.DEBIT.ToString() });
+
+            Console.WriteLine($"Total Bill Transactions Read: {billTransactionDbos.Count()}");
+        }
+
+        var billTransactions = _mapper.Map<List<BillTransaction>>(billTransactionDbos);
+        Console.WriteLine("successfully mapped!!!");
+    }
 
     private static List<BillTransaction> GetBillTransactions(BillTransactionSheet transactionSheet, GoogleSheetReader googleSheetReader)
     {
@@ -67,7 +97,6 @@ public static class MyFireDemo
         transactionList.AddRange(needsCardTransactions);
         transactionList.AddRange(wantsCardTransactions);
 
-        // Helper.WriteToJson(secrets.FileWritePath, transactionList); // TODO: Fix File Path Write
         Console.WriteLine($"Total Bill Transactions Written: {transactionList.Count()}");
 
         return transactionList;
@@ -96,6 +125,19 @@ public static class MyFireDemo
 
             cfg.CreateMap<IList<object>, JpmWantsCardBillTransaction>()
                 .IncludeBase<IList<object>, JpmBillTransaction>();
+
+            cfg.CreateMap<BillTransaction, BillTransactionDbo>()
+                .ForMember(dest => dest.id, act => act.MapFrom(src => src.Id))
+                .ForMember(dest => dest.transaction_date, act => act.MapFrom(src => src.TransactionDate))
+                .ForMember(dest => dest.amount, act => act.MapFrom(src => src.Amount))
+                .ForMember(dest => dest.description, act => act.MapFrom(src => src.Description))
+                .ForMember(dest => dest.transaction_type, act => act.Ignore())
+                .ForMember(dest => dest.transaction_account, act => act.Ignore())
+                .ForMember(dest => dest.transaction_type, act => act.MapFrom(src => src.Type.ToString()))
+                .ForMember(dest => dest.transaction_account, act => act.MapFrom(src => src.Account.ToString()))
+                .ReverseMap()
+                .ForPath(dest => dest.Type, act => act.MapFrom(src => Enum.Parse<TransactionType>(src.transaction_type)))
+                .ForPath(dest => dest.Account, act => act.MapFrom(src => Enum.Parse<TransactionAccount>(src.transaction_account)));
         });
         return config.CreateMapper();
     }

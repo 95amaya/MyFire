@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Dapper.Contrib.Extensions;
 
-namespace MyFireConsoleApp.Models;
+namespace DemoConsoleApp.Models;
 
 public class Student
 {
@@ -51,21 +52,28 @@ public enum TransactionAccount
     WANTS = 1,
 }
 
+[Table("bill_transactions")]
+public class BillTransactionDbo
+{
+    [Key]
+    public int id { get; set; }
+    public DateTime transaction_date { get; set; }
+    public double amount { get; set; }
+    public string description { get; set; }
+    public string transaction_type { get; set; }
+    public string transaction_account { get; set; }
+}
+
 public class BillTransaction
 {
+    public int Id { get; set; }
     public DateTime TransactionDate { get; set; }
     public double Amount { get; set; }
     public string Description { get; set; }
-    public TransactionCategory? Category { get; set; }
     public TransactionType? Type { get; set; }
     public TransactionAccount? Account { get; set; }
 
     public BillTransaction() { }
-
-    public BillTransaction(TransactionCategory category)
-    {
-        Category = category;
-    }
 
     public BillTransaction(TransactionType type, TransactionAccount account)
     {
