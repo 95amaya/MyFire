@@ -7,8 +7,9 @@ using System.Linq;
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
 using Dapper;
-using Dapper.Contrib.Extensions;
 using System.IO;
+using Services.Models;
+using Dapper.Contrib.Extensions;
 
 namespace DemoConsoleApp.Demos;
 public static class MyFireDemo
@@ -22,20 +23,22 @@ public static class MyFireDemo
     public static void Run(string[] args, Secrets secrets)
     {
         var _mapper = InitializeAutomapper();
+        // DapperExtensions.DapperExtensions.SqlDialect = new DapperExtensions.Sql.MySqlDialect();
+
         // Get From Sheet
         // var googleSheetApiClient = Helper.InitializeSheetService(ApplicationName, Scopes);
         // var googleSheetReader = new GoogleSheetReader(_mapper, new GoogleSheetClient(googleSheetApiClient));
         // var billTransactions = GetBillTransactions(secrets.BillTransactionSheets.FirstOrDefault(), googleSheetReader);
 
         // Build output File Path
-        // var billTransactionsFilePath = Path.Combine(Directory.GetCurrentDirectory(), "DemoConsoleApp", "output", "output.json");
+        var billTransactionsFilePath = Path.Combine(Directory.GetCurrentDirectory(), "DemoConsoleApp", "output", "output.json");
 
         // write to file
         // Helper.WriteToJson(billTransactionsFilePath, billTransactions);
 
         // read from file
-        // var billTransactions = Helper.ReadFromJson<List<BillTransaction>>(billTransactionsFilePath);
-        // Console.WriteLine($"Total Bill Transactions Read: {billTransactions.Count()}");
+        var billTransactions = Helper.ReadFromJson<List<BillTransactionDto>>(billTransactionsFilePath);
+        Console.WriteLine($"Total Bill Transactions Read: {billTransactions.Count()}");
 
         // Save Transactions to DB
         // https://medium.com/dapper-net/custom-columns-mapping-1cd45dfd51d6
@@ -43,54 +46,57 @@ public static class MyFireDemo
         var sql = "SELECT CURDATE();";
         IEnumerable<BillTransactionDbo> billTransactionDbos;
 
-        // billTransactionDbos = _mapper.Map<List<BillTransactionDbo>>(billTransactions);
-        // var testList = _mapper.Map<List<BillTransaction>>(billTransactionDbos);
+        billTransactionDbos = _mapper.Map<List<BillTransactionDbo>>(billTransactions);
+        var testList = _mapper.Map<List<BillTransactionDto>>(billTransactionDbos);
 
         // var billTransactionDbo = _mapper.Map<BillTransactionDbo>(billTransactions.FirstOrDefault());
         // var billTransactionDbos = _mapper.Map<List<BillTransactionDbo>>(billTransactions);
 
+        // var test1 = billTransactions.Where(p => p.TransactionDate == null).ToList();
+        // var test2 = billTransactionDbos.Where(p => p.transaction_date == null).ToList();
         // dbconnection manager
         using (var connection = new MySqlConnection(connectionString))
         {
-            // connection.Open();
+            connection.Open();
             var retVal = connection.QueryFirstOrDefault<DateTime>(sql);
             Console.WriteLine($"Mysql Connection Test Output: {retVal}");
 
             // bulk insert into DB
-            // var count = connection.Insert(billTransactionDbos);
-            // Console.WriteLine($"Total Inserts: {count}");
+            var count = connection.Insert(billTransactionDbos);
+            Console.WriteLine($"Total Inserts: {count}");
+            connection.Close();
 
             // read from DB
             // billTransactionDbos = connection.GetAll<BillTransactionDbo>();
 
-            billTransactionDbos = connection.Query<BillTransactionDbo>(@"
-                select * from bill_transactions
-                where
-                    transaction_type = @foo
-            ;", new { foo = TransactionType.DEBIT.ToString() });
+            // billTransactionDbos = connection.Query<BillTransactionDbo>(@"
+            //     select * from BillTransactionDbo
+            //     where
+            //         transaction_type = @foo
+            // ;", new { foo = TransactionType.DEBIT.ToString() });
 
-            Console.WriteLine($"Total Bill Transactions Read: {billTransactionDbos.Count()}");
+            // Console.WriteLine($"Total Bill Transactions Read: {billTransactionDbos.Count()}");
         }
 
-        var billTransactions = _mapper.Map<List<BillTransaction>>(billTransactionDbos);
+        // var mapTest = _mapper.Map<List<BillTransactionDto>>(billTransactionDbos);
         Console.WriteLine("successfully mapped!!!");
     }
 
-    private static List<BillTransaction> GetBillTransactions(BillTransactionSheet transactionSheet, GoogleSheetReader googleSheetReader)
+    private static List<BillTransactionDto> GetBillTransactions(BillTransactionSheet transactionSheet, GoogleSheetReader googleSheetReader)
     {
-        var transactionList = new List<BillTransaction>();
+        var transactionList = new List<BillTransactionDto>();
 
         // read from google sheet
-        var needsCheckingTransactions = googleSheetReader.ReadFrom<WfNeedsCheckingBillTransaction>(transactionSheet.SheetId, transactionSheet.NeedsCheckingTransactionRange);
-        var wantsCheckingTransactions = googleSheetReader.ReadFrom<WfWantsCheckingBillTransaction>(transactionSheet.SheetId, transactionSheet.WantsCheckingTransactionRange);
-        var needsCardTransactions = googleSheetReader.ReadFrom<WfNeedsCardBillTransaction>(transactionSheet.SheetId, transactionSheet.NeedsCardTransactionRange);
-        var wantsCardTransactions = googleSheetReader.ReadFrom<JpmWantsCardBillTransaction>(transactionSheet.SheetId, transactionSheet.WantsCardTransactionRange);
+        var needsCheckingTransactions = googleSheetReader.ReadFrom<WfNeedsCheckingBillTransactionDto>(transactionSheet.SheetId, transactionSheet.NeedsCheckingTransactionRange);
+        var wantsCheckingTransactions = googleSheetReader.ReadFrom<WfWantsCheckingBillTransactionDto>(transactionSheet.SheetId, transactionSheet.WantsCheckingTransactionRange);
+        var needsCardTransactions = googleSheetReader.ReadFrom<WfNeedsCardBillTransactionDto>(transactionSheet.SheetId, transactionSheet.NeedsCardTransactionRange);
+        var wantsCardTransactions = googleSheetReader.ReadFrom<JpmWantsCardBillTransactionDto>(transactionSheet.SheetId, transactionSheet.WantsCardTransactionRange);
 
         // Prints my transactions from spreadsheet
-        PrintSampleOfDataSet("NEEDS CHECKING Sample", needsCheckingTransactions.Cast<BillTransaction>());
-        PrintSampleOfDataSet("WANTS CHECKING Sample", wantsCheckingTransactions.Cast<BillTransaction>());
-        PrintSampleOfDataSet("NEEDS CARD Sample", needsCardTransactions.Cast<BillTransaction>());
-        PrintSampleOfDataSet("WANTS CARD Sample", wantsCardTransactions.Cast<BillTransaction>());
+        PrintSampleOfDataSet("NEEDS CHECKING Sample", needsCheckingTransactions.Cast<BillTransactionDto>());
+        PrintSampleOfDataSet("WANTS CHECKING Sample", wantsCheckingTransactions.Cast<BillTransactionDto>());
+        PrintSampleOfDataSet("NEEDS CARD Sample", needsCardTransactions.Cast<BillTransactionDto>());
+        PrintSampleOfDataSet("WANTS CARD Sample", wantsCardTransactions.Cast<BillTransactionDto>());
 
         transactionList.AddRange(needsCheckingTransactions);
         transactionList.AddRange(wantsCheckingTransactions);
@@ -106,27 +112,27 @@ public static class MyFireDemo
     {
         var config = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<IList<object>, WfBillTransaction>()
+            cfg.CreateMap<IList<object>, WfBillTransactionDto>()
                 .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => src[0]))
                 .ForMember(dest => dest.Amount, act => act.MapFrom(src => src[1]))
                 .ForMember(dest => dest.Description, act => act.MapFrom(src => src[4]));
 
-            cfg.CreateMap<IList<object>, WfNeedsCheckingBillTransaction>()
-                .IncludeBase<IList<object>, WfBillTransaction>();
-            cfg.CreateMap<IList<object>, WfWantsCheckingBillTransaction>()
-                .IncludeBase<IList<object>, WfBillTransaction>();
-            cfg.CreateMap<IList<object>, WfNeedsCardBillTransaction>()
-                .IncludeBase<IList<object>, WfBillTransaction>();
+            cfg.CreateMap<IList<object>, WfNeedsCheckingBillTransactionDto>()
+                .IncludeBase<IList<object>, WfBillTransactionDto>();
+            cfg.CreateMap<IList<object>, WfWantsCheckingBillTransactionDto>()
+                .IncludeBase<IList<object>, WfBillTransactionDto>();
+            cfg.CreateMap<IList<object>, WfNeedsCardBillTransactionDto>()
+                .IncludeBase<IList<object>, WfBillTransactionDto>();
 
-            cfg.CreateMap<IList<object>, JpmBillTransaction>()
+            cfg.CreateMap<IList<object>, JpmBillTransactionDto>()
                 .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => src[0]))
                 .ForMember(dest => dest.Amount, act => act.MapFrom(src => src[5]))
                 .ForMember(dest => dest.Description, act => act.MapFrom(src => src[2]));
 
-            cfg.CreateMap<IList<object>, JpmWantsCardBillTransaction>()
-                .IncludeBase<IList<object>, JpmBillTransaction>();
+            cfg.CreateMap<IList<object>, JpmWantsCardBillTransactionDto>()
+                .IncludeBase<IList<object>, JpmBillTransactionDto>();
 
-            cfg.CreateMap<BillTransaction, BillTransactionDbo>()
+            cfg.CreateMap<BillTransactionDto, BillTransactionDbo>()
                 .ForMember(dest => dest.id, act => act.MapFrom(src => src.Id))
                 .ForMember(dest => dest.transaction_date, act => act.MapFrom(src => src.TransactionDate))
                 .ForMember(dest => dest.amount, act => act.MapFrom(src => src.Amount))
@@ -142,7 +148,7 @@ public static class MyFireDemo
         return config.CreateMapper();
     }
 
-    private static void PrintSampleOfDataSet(string title, IEnumerable<BillTransaction> transactions)
+    private static void PrintSampleOfDataSet(string title, IEnumerable<BillTransactionDto> transactions)
     {
         Console.WriteLine($"{title}, Count: {transactions.Count()}");
         foreach (var transaction in transactions.Take(5))

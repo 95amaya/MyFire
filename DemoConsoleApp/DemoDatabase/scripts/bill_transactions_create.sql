@@ -9,3 +9,12 @@ CREATE TABLE
         transaction_type NVARCHAR(25),
         transaction_account NVARCHAR(25)
     ) COMMENT 'consolidated list of transactions from various accounts';
+
+ALTER TABLE
+    bill_transactions
+ADD
+    CONSTRAINT uc_transaction UNIQUE (
+        transaction_date,
+        amount,
+        description
+    );
