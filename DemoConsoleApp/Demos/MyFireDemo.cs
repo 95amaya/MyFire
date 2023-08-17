@@ -23,7 +23,7 @@ public static class MyFireDemo
     public static void Run(string[] args, Secrets secrets)
     {
         var _mapper = InitializeAutomapper();
-        // DapperExtensions.DapperExtensions.SqlDialect = new DapperExtensions.Sql.MySqlDialect();
+        SimpleCRUD.SetDialect(SimpleCRUD.Dialect.MySQL);
 
         // Get From Sheet
         // var googleSheetApiClient = Helper.InitializeSheetService(ApplicationName, Scopes);
@@ -31,14 +31,14 @@ public static class MyFireDemo
         // var billTransactions = GetBillTransactions(secrets.BillTransactionSheets.FirstOrDefault(), googleSheetReader);
 
         // Build output File Path
-        var billTransactionsFilePath = Path.Combine(Directory.GetCurrentDirectory(), "DemoConsoleApp", "output", "output.json");
+        // var billTransactionsFilePath = Path.Combine(Directory.GetCurrentDirectory(), "DemoConsoleApp", "output", "output.json");
 
         // write to file
         // Helper.WriteToJson(billTransactionsFilePath, billTransactions);
 
         // read from file
-        var billTransactions = Helper.ReadFromJson<List<BillTransactionDto>>(billTransactionsFilePath);
-        Console.WriteLine($"Total Bill Transactions Read: {billTransactions.Count()}");
+        // var billTransactions = Helper.ReadFromJson<List<BillTransactionDto>>(billTransactionsFilePath);
+        // Console.WriteLine($"Total Bill Transactions Read: {billTransactions.Count()}");
 
         // Save Transactions to DB
         // https://medium.com/dapper-net/custom-columns-mapping-1cd45dfd51d6
@@ -46,14 +46,8 @@ public static class MyFireDemo
         var sql = "SELECT CURDATE();";
         IEnumerable<BillTransactionDbo> billTransactionDbos;
 
-        billTransactionDbos = _mapper.Map<List<BillTransactionDbo>>(billTransactions);
-        var testList = _mapper.Map<List<BillTransactionDto>>(billTransactionDbos);
+        // billTransactionDbos = _mapper.Map<List<BillTransactionDbo>>(billTransactions);
 
-        // var billTransactionDbo = _mapper.Map<BillTransactionDbo>(billTransactions.FirstOrDefault());
-        // var billTransactionDbos = _mapper.Map<List<BillTransactionDbo>>(billTransactions);
-
-        // var test1 = billTransactions.Where(p => p.TransactionDate == null).ToList();
-        // var test2 = billTransactionDbos.Where(p => p.transaction_date == null).ToList();
         // dbconnection manager
         using (var connection = new MySqlConnection(connectionString))
         {
@@ -62,9 +56,9 @@ public static class MyFireDemo
             Console.WriteLine($"Mysql Connection Test Output: {retVal}");
 
             // bulk insert into DB
-            var count = connection.Insert(billTransactionDbos);
-            Console.WriteLine($"Total Inserts: {count}");
-            connection.Close();
+            // var count = connection.Insert(billTransactionDbos);
+            // Console.WriteLine($"Total Inserts: {count}");
+            // connection.Close();
 
             // read from DB
             // billTransactionDbos = connection.GetAll<BillTransactionDbo>();
@@ -75,11 +69,15 @@ public static class MyFireDemo
             //         transaction_type = @foo
             // ;", new { foo = TransactionType.DEBIT.ToString() });
 
+            billTransactionDbos = connection.GetList<BillTransactionDbo>(new { transaction_type = TransactionType.DEBIT.ToString() });
+            // billTransactionDbos = connection.GetList<BillTransactionDbo>();
+
             // Console.WriteLine($"Total Bill Transactions Read: {billTransactionDbos.Count()}");
         }
 
-        // var mapTest = _mapper.Map<List<BillTransactionDto>>(billTransactionDbos);
-        Console.WriteLine("successfully mapped!!!");
+
+        var mapTest = _mapper.Map<List<BillTransactionDto>>(billTransactionDbos);
+        Console.WriteLine($"successfully mapped {mapTest.Count()} items");
     }
 
     private static List<BillTransactionDto> GetBillTransactions(BillTransactionSheet transactionSheet, GoogleSheetReader googleSheetReader)
