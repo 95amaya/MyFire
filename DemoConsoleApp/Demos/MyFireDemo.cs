@@ -10,6 +10,8 @@ using Dapper;
 using System.IO;
 using Services.Models;
 using Dapper.Contrib.Extensions;
+using Services.CoreLibraries;
+using Services;
 
 namespace DemoConsoleApp.Demos;
 public static class MyFireDemo
@@ -30,54 +32,57 @@ public static class MyFireDemo
         // var googleSheetReader = new GoogleSheetReader(_mapper, new GoogleSheetClient(googleSheetApiClient));
         // var billTransactions = GetBillTransactions(secrets.BillTransactionSheets.FirstOrDefault(), googleSheetReader);
 
-        // Build output File Path
-        // var billTransactionsFilePath = Path.Combine(Directory.GetCurrentDirectory(), "DemoConsoleApp", "output", "output.json");
-
         // write to file
-        // Helper.WriteToJson(billTransactionsFilePath, billTransactions);
+        // Helper.WriteToJson(secrets.TempFilePath, billTransactions);
 
         // read from file
-        // var billTransactions = Helper.ReadFromJson<List<BillTransactionDto>>(billTransactionsFilePath);
-        // Console.WriteLine($"Total Bill Transactions Read: {billTransactions.Count()}");
+        var billTransactions = Helper.ReadFromJson<List<BillTransactionDto>>(secrets.TempFilePath);
+        Console.WriteLine($"Total Bill Transactions Read: {billTransactions.Count()}");
 
         // Save Transactions to DB
-        // https://medium.com/dapper-net/custom-columns-mapping-1cd45dfd51d6
-        var connectionString = "Server=127.0.0.1;port=3306;Uid=root;Password=test_pass;Database=localdb";
         var sql = "SELECT CURDATE();";
         IEnumerable<BillTransactionDbo> billTransactionDbos;
 
         // billTransactionDbos = _mapper.Map<List<BillTransactionDbo>>(billTransactions);
 
         // dbconnection manager
-        using (var connection = new MySqlConnection(connectionString))
+        var connManager = new MySqlDbConnectionManager(secrets.ConnectionString);
+        var daoDb = new BillTransactionDaoDb(connManager, _mapper);
+
+        // daoDb.BulkInsert(billTransactions);
+        var testList = daoDb.GetList(new BillTransactionDto()
         {
-            connection.Open();
-            var retVal = connection.QueryFirstOrDefault<DateTime>(sql);
-            Console.WriteLine($"Mysql Connection Test Output: {retVal}");
+            Type = TransactionType.DEBIT
+        });
 
-            // bulk insert into DB
-            // var count = connection.Insert(billTransactionDbos);
-            // Console.WriteLine($"Total Inserts: {count}");
-            // connection.Close();
+        // using (var connection = new MySqlConnection(connectionString))
+        // {
+        //     connection.Open();
+        //     var retVal = connection.QueryFirstOrDefault<DateTime>(sql);
+        //     Console.WriteLine($"Mysql Connection Test Output: {retVal}");
 
-            // read from DB
-            // billTransactionDbos = connection.GetAll<BillTransactionDbo>();
+        //     // bulk insert into DB
+        //     // var count = connection.Insert(billTransactionDbos);
+        //     // Console.WriteLine($"Total Inserts: {count}");
+        //     // connection.Close();
 
-            // billTransactionDbos = connection.Query<BillTransactionDbo>(@"
-            //     select * from BillTransactionDbo
-            //     where
-            //         transaction_type = @foo
-            // ;", new { foo = TransactionType.DEBIT.ToString() });
+        //     // read from DB
+        //     // billTransactionDbos = connection.GetAll<BillTransactionDbo>();
 
-            billTransactionDbos = connection.GetList<BillTransactionDbo>(new { transaction_type = TransactionType.DEBIT.ToString() });
-            // billTransactionDbos = connection.GetList<BillTransactionDbo>();
+        //     // billTransactionDbos = connection.Query<BillTransactionDbo>(@"
+        //     //     select * from BillTransactionDbo
+        //     //     where
+        //     //         transaction_type = @foo
+        //     // ;", new { foo = TransactionType.DEBIT.ToString() });
 
-            // Console.WriteLine($"Total Bill Transactions Read: {billTransactionDbos.Count()}");
-        }
+        //     billTransactionDbos = connection.GetList<BillTransactionDbo>(new { transaction_type = TransactionType.DEBIT.ToString() });
+        //     // billTransactionDbos = connection.GetList<BillTransactionDbo>();
+
+        //     // Console.WriteLine($"Total Bill Transactions Read: {billTransactionDbos.Count()}");
+        // }
 
 
-        var mapTest = _mapper.Map<List<BillTransactionDto>>(billTransactionDbos);
-        Console.WriteLine($"successfully mapped {mapTest.Count()} items");
+        Console.WriteLine($"successfully mapped {testList.Count()} items");
     }
 
     private static List<BillTransactionDto> GetBillTransactions(BillTransactionSheet transactionSheet, GoogleSheetReader googleSheetReader)

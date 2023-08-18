@@ -3,24 +3,26 @@ using Services.Models;
 
 namespace Services;
 
-public class BillTransactionSheetDao : IBillTransactionSheetDao
+public class BillTransactionDaoSheet : IBillTransactionDao
 {
+    private BillTransactionSheet _sheet { get; set; }
     private ISheetReader _sheetReader { get; set; }
 
-    public BillTransactionSheetDao(ISheetReader sheetReader)
+    public BillTransactionDaoSheet(ISheetReader sheetReader, BillTransactionSheet sheet)
     {
+        _sheet = sheet;
         _sheetReader = sheetReader;
     }
 
-    public List<BillTransactionDto> GetTransactions(BillTransactionSheet sheet)
+    public IEnumerable<BillTransactionDto> GetList()
     {
         var transactionList = new List<BillTransactionDto>();
 
         // read from google sheet
-        var needsCheckingTransactions = _sheetReader.ReadFrom<WfNeedsCheckingBillTransactionDto>(sheet.SheetId, sheet.NeedsCheckingTransactionRange);
-        var wantsCheckingTransactions = _sheetReader.ReadFrom<WfWantsCheckingBillTransactionDto>(sheet.SheetId, sheet.WantsCheckingTransactionRange);
-        var needsCardTransactions = _sheetReader.ReadFrom<WfNeedsCardBillTransactionDto>(sheet.SheetId, sheet.NeedsCardTransactionRange);
-        var wantsCardTransactions = _sheetReader.ReadFrom<JpmWantsCardBillTransactionDto>(sheet.SheetId, sheet.WantsCardTransactionRange);
+        var needsCheckingTransactions = _sheetReader.ReadFrom<WfNeedsCheckingBillTransactionDto>(_sheet.SheetId, _sheet.NeedsCheckingTransactionRange);
+        var wantsCheckingTransactions = _sheetReader.ReadFrom<WfWantsCheckingBillTransactionDto>(_sheet.SheetId, _sheet.WantsCheckingTransactionRange);
+        var needsCardTransactions = _sheetReader.ReadFrom<WfNeedsCardBillTransactionDto>(_sheet.SheetId, _sheet.NeedsCardTransactionRange);
+        var wantsCardTransactions = _sheetReader.ReadFrom<JpmWantsCardBillTransactionDto>(_sheet.SheetId, _sheet.WantsCardTransactionRange);
 
         // Prints my transactions from spreadsheet
         // implement logger
@@ -37,5 +39,15 @@ public class BillTransactionSheetDao : IBillTransactionSheetDao
         // Console.WriteLine($"Total Bill Transactions Written: {transactionList.Count()}");
 
         return transactionList;
+    }
+
+    public IEnumerable<BillTransactionDto> GetList(BillTransactionDto criteria)
+    {
+        throw new NotImplementedException();
+    }
+
+    public long BulkInsert(IEnumerable<BillTransactionDto> list)
+    {
+        throw new NotImplementedException();
     }
 }
