@@ -1,14 +1,11 @@
-﻿using Demo;
-using System;
+﻿using DemoConsoleApp.Demos;
 
-namespace MyFireConsoleApp;
+namespace DemoConsoleApp;
 class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Hello World!");
-
-        var secrets = DemoHelper.ReadFromJson("secrets.json");
+        var secrets = Helper.ReadFromJson<Models.Secrets>("./DemoConsoleApp/secrets.json");
         // GoogleSheetsDemo.Run(args);
         // GoogleSheetsServicesDemo.Run(args);
         MyFireDemo.Run(args, secrets);

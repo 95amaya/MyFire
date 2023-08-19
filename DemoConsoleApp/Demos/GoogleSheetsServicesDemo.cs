@@ -1,11 +1,11 @@
 using AutoMapper;
 using Google.Apis.Sheets.v4;
-using MyFireConsoleApp.Models;
-using MyFireCoreLibraries;
+using DemoConsoleApp.Models;
+using CoreLibraries;
 using System;
 using System.Collections.Generic;
 
-namespace Demo;
+namespace DemoConsoleApp.Demos;
 public static class GoogleSheetsServicesDemo
 {
     // If modifying these scopes, delete your previously saved credentials
@@ -18,14 +18,14 @@ public static class GoogleSheetsServicesDemo
         var _mapper = InitializeAutomapper();
 
         // Create Google Sheets API service.
-        var googleSheetApiClient = DemoHelper.InitializeSheetService(ApplicationName, Scopes);
+        var googleSheetApiClient = Helper.InitializeSheetService(ApplicationName, Scopes);
 
         // Create Reader 
         var googleSheetReader = new GoogleSheetReader(_mapper, new GoogleSheetClient(googleSheetApiClient));
 
         // Define request parameters.
-        String spreadsheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms";
-        String range = "Class Data!A2:E";
+        string spreadsheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms";
+        string range = "Class Data!A2:E";
 
         var students = googleSheetReader.ReadFrom<Student>(spreadsheetId, range);
 
@@ -41,7 +41,7 @@ public static class GoogleSheetsServicesDemo
     {
         var config = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<IList<Object>, Student>()
+            cfg.CreateMap<IList<object>, Student>()
                 .ForMember(dest => dest.FirstName, act => act.MapFrom(src => src[0]))
                 .ForMember(dest => dest.Sex, act => act.MapFrom(src => src[1]))
                 .ForMember(dest => dest.Class, act => act.MapFrom(src => src[2]))
@@ -49,5 +49,19 @@ public static class GoogleSheetsServicesDemo
                 .ForMember(dest => dest.Major, act => act.MapFrom(src => src[4]));
         });
         return config.CreateMapper();
+    }
+}
+
+public class Student
+{
+    public string FirstName { get; set; }
+    public string Sex { get; set; }
+    public string Class { get; set; }
+    public string City { get; set; }
+    public string Major { get; set; }
+
+    public override string ToString()
+    {
+        return $"{FirstName}, {Major}, {City}";
     }
 }

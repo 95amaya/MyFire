@@ -5,9 +5,12 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
+    <PackageReference Include="Dapper.SimpleCRUD" Version="2.3.0" />
     <PackageReference Include="Google.Apis.Sheets.v4" Version="1.60.0.2979" />
+    <PackageReference Include="MySql.Data" Version="8.1.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MyFireCoreLibraries\MyFireCoreLibraries.csproj" />
+    <ProjectReference Include="..\Services\Services.csproj" />
   </ItemGroup>
 </Project>

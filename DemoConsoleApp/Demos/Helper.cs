@@ -5,23 +5,22 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Util.Store;
-using MyFireConsoleApp.Models;
 using Newtonsoft.Json;
 
-namespace Demo;
+namespace DemoConsoleApp.Demos;
 
-public static class DemoHelper
+public static class Helper
 {
     public static SheetsService InitializeSheetService(string appName, string[] scopes)
     {
         UserCredential credential;
 
         using (var stream =
-            new FileStream("credentials.json", FileMode.Open, FileAccess.Read))
+            new FileStream("./DemoConsoleApp/credentials.json", FileMode.Open, FileAccess.Read))
         {
             // The file token.json stores the user's access and refresh tokens, and is created
             // automatically when the authorization flow completes for the first time.
-            string credPath = "token.json";
+            string credPath = "./DemoConsoleApp/token.json";
             credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                 GoogleClientSecrets.FromStream(stream).Secrets,
                 scopes,
@@ -39,39 +38,20 @@ public static class DemoHelper
         });
     }
 
-    public static Secrets ReadFromJson(string path)
+    public static T ReadFromJson<T>(string path)
+    where T : class, new()
     {
-        using (StreamReader file = new StreamReader(path))
-        {
-            try
-            {
-                string json = file.ReadToEnd();
-
-                return JsonConvert.DeserializeObject<Secrets>(json);
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("Problem reading file");
-
-                return null;
-            }
-        }
+        using StreamReader file = new(path);
+        string json = file.ReadToEnd();
+        return JsonConvert.DeserializeObject<T>(json);
     }
 
-    public static void WriteToJson(string path, Object obj)
+    public static void WriteToJson(string path, object obj)
     {
         var jsonObj = JsonConvert.SerializeObject(obj);
 
-        using StreamWriter file = new StreamWriter(path);
-        try
-        {
-            file.Write(jsonObj);
-        }
-        catch (Exception)
-        {
-            Console.WriteLine("Problem reading file");
-        }
-
+        using StreamWriter file = new(path);
+        file.Write(jsonObj);
     }
 
 }

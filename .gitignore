@@ -1,5 +1,8 @@
-MyFireConsoleApp/token.json
-MyFireConsoleApp/secrets.json
+DemoConsoleApp/token.json
+DemoConsoleApp/secrets.json
+output/
+mysqldb/
+
 #Ignore thumbnails created by Windows
 Thumbs.db
 #Ignore files built by Visual Studio
