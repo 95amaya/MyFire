@@ -5,11 +5,11 @@ namespace Services.Models;
 
 public class BillTransactionSheet
 {
-    public string SheetId { get; set; }
-    public string NeedsCheckingTransactionRange { get; set; }
-    public string WantsCheckingTransactionRange { get; set; }
-    public string NeedsCardTransactionRange { get; set; }
-    public string WantsCardTransactionRange { get; set; }
+    public string SheetId { get; set; } = string.Empty;
+    public string NeedsCheckingTransactionRange { get; set; } = string.Empty;
+    public string WantsCheckingTransactionRange { get; set; } = string.Empty;
+    public string NeedsCardTransactionRange { get; set; } = string.Empty;
+    public string WantsCardTransactionRange { get; set; } = string.Empty;
 }
 
 public enum TransactionType
@@ -25,17 +25,19 @@ public enum TransactionAccount
 }
 
 [Table("bill_transactions")]
-// BillTransactionDbo
 public class BillTransactionDbo
 {
     [Key]
     public int? id { get; set; }
     public DateTime? transaction_date { get; set; }
     public double? amount { get; set; }
-    public string description { get; set; }
-    public string transaction_type { get; set; }
-    public string transaction_account { get; set; }
+    public string? description { get; set; }
+    public string? transaction_type { get; set; }
+    public string? transaction_account { get; set; }
+}
 
+public class BillTransactionDboFilter : BillTransactionDbo
+{
     public string GetTransactionTypeFilterStr(string propName) => $" {nameof(transaction_type)} = @{propName} ";
 }
 
@@ -44,7 +46,7 @@ public class BillTransactionDto
     public int? Id { get; set; }
     public DateTime? TransactionDate { get; set; }
     public double? Amount { get; set; }
-    public string Description { get; set; }
+    public string? Description { get; set; }
     public TransactionType? Type { get; set; }
     public TransactionAccount? Account { get; set; }
 

@@ -7,16 +7,16 @@ using Services.Models;
 
 namespace Services;
 
-public class BillTransactionDaoDb : IBillTransactionDao
+public class BillTransactionDaoDb : IBillTransactionDaoWriter, IBillTransactionDaoFilter
 {
     private IDbConnectionManager _dbConnectionManager { get; set; }
     private IMapper _mapper { get; set; }
-    private BillTransactionDbo _filterHelper { get; set; }
+    private BillTransactionDboFilter _filterHelper { get; set; }
     public BillTransactionDaoDb(IDbConnectionManager dbConnectionManager, IMapper mapper)
     {
         _dbConnectionManager = dbConnectionManager;
         _mapper = mapper;
-        _filterHelper = new BillTransactionDbo();
+        _filterHelper = new BillTransactionDboFilter();
     }
 
     public long BulkInsert(IEnumerable<BillTransactionDto> list)
@@ -26,14 +26,10 @@ public class BillTransactionDaoDb : IBillTransactionDao
         return dpExt.SqlMapperExtensions.Insert(conn, dboList);
     }
 
-    public IEnumerable<BillTransactionDto> GetList()
-    {
-        throw new NotImplementedException();
-    }
-
     public IEnumerable<BillTransactionDto> GetList(TransactionType transactionType)
     {
         var whereClause = $" where {_filterHelper.GetTransactionTypeFilterStr(nameof(transactionType))} ";
+
         using var conn = _dbConnectionManager.CreateConnection();
         var billTransactionDbos = conn.GetList<BillTransactionDbo>(whereClause, new { transactionType });
 

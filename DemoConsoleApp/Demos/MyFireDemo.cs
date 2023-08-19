@@ -33,8 +33,8 @@ public static class MyFireDemo
         // Helper.WriteToJson(secrets.TempFilePath, billTransactions);
 
         // read from file
-        var billTransactions = Helper.ReadFromJson<List<BillTransactionDto>>(secrets.TempFilePath);
-        Console.WriteLine($"Total Bill Transactions Read: {billTransactions.Count()}");
+        // var billTransactions = Helper.ReadFromJson<List<BillTransactionDto>>(secrets.TempFilePath);
+        // Console.WriteLine($"Total Bill Transactions Read: {billTransactions.Count()}");
 
         // dbconnection manager
         var connManager = new MySqlDbConnectionManager(secrets.ConnectionString);
@@ -69,9 +69,9 @@ public static class MyFireDemo
         return transactionList;
     }
 
-    private static long BulkInsert(IBillTransactionDao billTransactionDao, IEnumerable<BillTransactionDto> list)
+    private static long BulkInsert(IBillTransactionDaoWriter billTransactionDaoWriter, IEnumerable<BillTransactionDto> list)
     {
-        return billTransactionDao.BulkInsert(list);
+        return billTransactionDaoWriter.BulkInsert(list);
     }
 
     private static bool TestDbConnection(IDbConnectionManager dbConnectionManager)

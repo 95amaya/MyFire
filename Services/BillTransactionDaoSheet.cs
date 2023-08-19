@@ -3,7 +3,7 @@ using Services.Models;
 
 namespace Services;
 
-public class BillTransactionDaoSheet : IBillTransactionDao
+public class BillTransactionDaoSheet : IBillTransactionDaoReader
 {
     private BillTransactionSheet _sheet { get; set; }
     private ISheetReader _sheetReader { get; set; }
@@ -39,15 +39,5 @@ public class BillTransactionDaoSheet : IBillTransactionDao
         // Console.WriteLine($"Total Bill Transactions Written: {transactionList.Count()}");
 
         return transactionList;
-    }
-
-    public long BulkInsert(IEnumerable<BillTransactionDto> list)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IEnumerable<BillTransactionDto> GetList(TransactionType transactionType)
-    {
-        throw new NotImplementedException();
     }
 }
