@@ -41,12 +41,12 @@ public class BillTransactionDaoSheet : IBillTransactionDao
         return transactionList;
     }
 
-    public IEnumerable<BillTransactionDto> GetList(BillTransactionDto criteria)
+    public long BulkInsert(IEnumerable<BillTransactionDto> list)
     {
         throw new NotImplementedException();
     }
 
-    public long BulkInsert(IEnumerable<BillTransactionDto> list)
+    public IEnumerable<BillTransactionDto> GetList(TransactionType transactionType)
     {
         throw new NotImplementedException();
     }

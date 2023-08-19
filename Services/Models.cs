@@ -35,6 +35,8 @@ public class BillTransactionDbo
     public string description { get; set; }
     public string transaction_type { get; set; }
     public string transaction_account { get; set; }
+
+    public string GetTransactionTypeFilterStr(string propName) => $" {nameof(transaction_type)} = @{propName} ";
 }
 
 public class BillTransactionDto

@@ -5,11 +5,8 @@ using CoreLibraries;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using MySql.Data.MySqlClient;
 using Dapper;
-using System.IO;
 using Services.Models;
-using Dapper.Contrib.Extensions;
 using Services.CoreLibraries;
 using Services;
 
@@ -39,50 +36,11 @@ public static class MyFireDemo
         var billTransactions = Helper.ReadFromJson<List<BillTransactionDto>>(secrets.TempFilePath);
         Console.WriteLine($"Total Bill Transactions Read: {billTransactions.Count()}");
 
-        // Save Transactions to DB
-        var sql = "SELECT CURDATE();";
-        IEnumerable<BillTransactionDbo> billTransactionDbos;
-
-        // billTransactionDbos = _mapper.Map<List<BillTransactionDbo>>(billTransactions);
-
         // dbconnection manager
         var connManager = new MySqlDbConnectionManager(secrets.ConnectionString);
         var daoDb = new BillTransactionDaoDb(connManager, _mapper);
 
-        // daoDb.BulkInsert(billTransactions);
-        var testList = daoDb.GetList(new BillTransactionDto()
-        {
-            Type = TransactionType.DEBIT
-        });
-
-        // using (var connection = new MySqlConnection(connectionString))
-        // {
-        //     connection.Open();
-        //     var retVal = connection.QueryFirstOrDefault<DateTime>(sql);
-        //     Console.WriteLine($"Mysql Connection Test Output: {retVal}");
-
-        //     // bulk insert into DB
-        //     // var count = connection.Insert(billTransactionDbos);
-        //     // Console.WriteLine($"Total Inserts: {count}");
-        //     // connection.Close();
-
-        //     // read from DB
-        //     // billTransactionDbos = connection.GetAll<BillTransactionDbo>();
-
-        //     // billTransactionDbos = connection.Query<BillTransactionDbo>(@"
-        //     //     select * from BillTransactionDbo
-        //     //     where
-        //     //         transaction_type = @foo
-        //     // ;", new { foo = TransactionType.DEBIT.ToString() });
-
-        //     billTransactionDbos = connection.GetList<BillTransactionDbo>(new { transaction_type = TransactionType.DEBIT.ToString() });
-        //     // billTransactionDbos = connection.GetList<BillTransactionDbo>();
-
-        //     // Console.WriteLine($"Total Bill Transactions Read: {billTransactionDbos.Count()}");
-        // }
-
-
-        Console.WriteLine($"successfully mapped {testList.Count()} items");
+        var testList = daoDb.GetList(TransactionType.DEBIT);
     }
 
     private static List<BillTransactionDto> GetBillTransactions(BillTransactionSheet transactionSheet, GoogleSheetReader googleSheetReader)
@@ -111,6 +69,20 @@ public static class MyFireDemo
         return transactionList;
     }
 
+    private static long BulkInsert(IBillTransactionDao billTransactionDao, IEnumerable<BillTransactionDto> list)
+    {
+        return billTransactionDao.BulkInsert(list);
+    }
+
+    private static bool TestDbConnection(IDbConnectionManager dbConnectionManager)
+    {
+        var sql = "SELECT CURDATE();";
+
+        using var connection = dbConnectionManager.CreateConnection();
+        var retVal = connection.QueryFirstOrDefault<DateTime>(sql);
+        Console.WriteLine($"Mysql Connection Test Output: {retVal}");
+        return true;
+    }
     private static IMapper InitializeAutomapper()
     {
         var config = new MapperConfiguration(cfg =>
