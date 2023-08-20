@@ -4,21 +4,36 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        {
-            "name": ".NET Core Launch (console)",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/DemoConsoleApp/bin/Debug/net7.0/DemoConsoleApp.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}",
-            "console": "internalConsole",
-            "stopAtEntry": false
+    {
+        "name": "Run WebApp",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build:WebApp",
+        "program": "${workspaceFolder}/WebApp/bin/Debug/net7.0/WebApp.dll",
+        "args": [],
+        "cwd": "${workspaceFolder}/WebApp",
+        "stopAtEntry": false,
+        "serverReadyAction": {
+            "action": "openExternally",
+            "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
         },
-        {
-            "name": ".NET Core Attach",
-            "type": "coreclr",
-            "request": "attach"
+        "env": {
+            "ASPNETCORE_ENVIRONMENT": "Development"
+        },
+        "sourceFileMap": {
+            "/Views": "${workspaceFolder}/WebApp/Views"
         }
+    },
+    {
+        "name": "Run DemoConsoleApp",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build:DemoConsoleApp",
+        "program": "${workspaceFolder}/DemoConsoleApp/bin/Debug/net7.0/DemoConsoleApp.dll",
+        "args": [],
+        "cwd": "${workspaceFolder}",
+        "console": "internalConsole",
+        "stopAtEntry": false
+    },
     ]
 }
