@@ -7,11 +7,11 @@ using Services.Models;
 
 namespace Services;
 
-public class BillTransactionDaoDb : IBillTransactionDaoWriter, IBillTransactionDaoFilter
+public class BillTransactionDaoDb : IBillTransactionDao
 {
-    private IDbConnectionManager _dbConnectionManager { get; set; }
-    private IMapper _mapper { get; set; }
-    private BillTransactionDboFilter _filterHelper { get; set; }
+    private readonly IDbConnectionManager _dbConnectionManager;
+    private readonly IMapper _mapper;
+    private readonly BillTransactionDboFilter _filterHelper;
     public BillTransactionDaoDb(IDbConnectionManager dbConnectionManager, IMapper mapper)
     {
         _dbConnectionManager = dbConnectionManager;

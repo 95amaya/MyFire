@@ -3,18 +3,18 @@ using Services.Models;
 
 namespace Services;
 
-public class BillTransactionDaoSheet : IBillTransactionDaoReader
+public class BillTransactionDaoSheetLoader : IBillTransactionDaoLoader
 {
-    private BillTransactionSheet _sheet { get; set; }
-    private ISheetReader _sheetReader { get; set; }
+    private readonly BillTransactionSheet _sheet;
+    private readonly ISheetReader _sheetReader;
 
-    public BillTransactionDaoSheet(ISheetReader sheetReader, BillTransactionSheet sheet)
+    public BillTransactionDaoSheetLoader(ISheetReader sheetReader, BillTransactionSheet sheet)
     {
         _sheet = sheet;
         _sheetReader = sheetReader;
     }
 
-    public IEnumerable<BillTransactionDto> GetList()
+    public IEnumerable<BillTransactionDto> Load()
     {
         var transactionList = new List<BillTransactionDto>();
 

@@ -2,17 +2,10 @@ using Services.Models;
 
 namespace Services;
 
-public interface IBillTransactionDaoReader
-{
-    public IEnumerable<BillTransactionDto> GetList();
-}
-
-public interface IBillTransactionDaoWriter
+public interface IBillTransactionDao
 {
     public long BulkInsert(IEnumerable<BillTransactionDto> list);
+    public IEnumerable<BillTransactionDto> GetList(TransactionType transactionType);
+
 }
 
-public interface IBillTransactionDaoFilter
-{
-    public IEnumerable<BillTransactionDto> GetList(TransactionType transactionType);
-}

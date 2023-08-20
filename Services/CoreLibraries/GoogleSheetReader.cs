@@ -4,8 +4,8 @@ namespace CoreLibraries;
 
 public class GoogleSheetReader : ISheetReader
 {
-    private ISheetClient _googleSheetsApiClient { get; set; }
-    private IMapper _mapper { get; set; }
+    private readonly ISheetClient _googleSheetsApiClient;
+    private readonly IMapper _mapper;
     public GoogleSheetReader(IMapper mapper, ISheetClient googleSheetsApiClient)
     {
         _googleSheetsApiClient = googleSheetsApiClient;

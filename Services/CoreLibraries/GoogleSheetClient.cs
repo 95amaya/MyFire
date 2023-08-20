@@ -4,7 +4,7 @@ namespace CoreLibraries;
 
 public class GoogleSheetClient : ISheetClient
 {
-    private SheetsService _googleSheetsApiClient { get; set; }
+    private readonly SheetsService _googleSheetsApiClient;
 
     public GoogleSheetClient(SheetsService googleSheetsApiClient)
     {

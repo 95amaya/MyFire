@@ -6,7 +6,7 @@ namespace Services.CoreLibraries;
 
 public class MySqlDbConnectionManager : IDbConnectionManager
 {
-    private string _connectionString { get; set; }
+    private readonly string _connectionString;
 
     public MySqlDbConnectionManager(string connectionString)
     {

@@ -69,9 +69,9 @@ public static class MyFireDemo
         return transactionList;
     }
 
-    private static long BulkInsert(IBillTransactionDaoWriter billTransactionDaoWriter, IEnumerable<BillTransactionDto> list)
+    private static long BulkInsert(IBillTransactionDao billTransactionDao, IEnumerable<BillTransactionDto> list)
     {
-        return billTransactionDaoWriter.BulkInsert(list);
+        return billTransactionDao.BulkInsert(list);
     }
 
     private static bool TestDbConnection(IDbConnectionManager dbConnectionManager)
