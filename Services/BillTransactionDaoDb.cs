@@ -31,7 +31,7 @@ public class BillTransactionDaoDb : IBillTransactionDao
         var whereClause = $" where {_filterHelper.GetTransactionTypeFilterStr(nameof(transactionType))} ";
 
         using var conn = _dbConnectionManager.CreateConnection();
-        var billTransactionDbos = conn.GetList<BillTransactionDbo>(whereClause, new { transactionType });
+        var billTransactionDbos = conn.GetList<BillTransactionDbo>(whereClause, new { transactionType = transactionType.ToString() });
 
         return _mapper.Map<IEnumerable<BillTransactionDto>>(billTransactionDbos);
     }

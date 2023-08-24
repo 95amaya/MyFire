@@ -24,23 +24,42 @@ public static class MyFireDemo
         var _mapper = InitializeAutomapper();
         SimpleCRUD.SetDialect(SimpleCRUD.Dialect.MySQL);
 
-        // Get From Sheet
-        // var googleSheetApiClient = Helper.InitializeSheetService(ApplicationName, Scopes);
-        // var googleSheetReader = new GoogleSheetReader(_mapper, new GoogleSheetClient(googleSheetApiClient));
-        // var billTransactions = GetBillTransactions(secrets.BillTransactionSheets.FirstOrDefault(), googleSheetReader);
+        var connManager = new MySqlDbConnectionManager(secrets.ConnectionString);
+        var daoDb = new BillTransactionDaoDb(connManager, _mapper);
+        var transactionDtos = daoDb.GetList(TransactionType.DEBIT);
 
-        // write to file
-        // Helper.WriteToJson(secrets.TempFilePath, billTransactions);
+        // var oneMonthRawList = transactionDtos.Where(p => p.TransactionDate.GetValueOrDefault().Month == 1).ToList();
 
-        // read from file
-        // var billTransactions = Helper.ReadFromJson<List<BillTransactionDto>>(secrets.TempFilePath);
-        // Console.WriteLine($"Total Bill Transactions Read: {billTransactions.Count()}");
+        // var rawList = transactionDtos
+        //     .Where(p => p.Amount > 0 && p.Account == TransactionAccount.NEEDS && !p.Description.Contains("ONLINE TRANSFER") && p.TransactionDate.GetValueOrDefault().Month == 1)
+        //     .ToList();
+
+        // rawList.ForEach(Console.WriteLine);
+        // Console.WriteLine(rawList.Sum(p => p.Amount.GetValueOrDefault()).ToString("C0"));
+
+        var reportList = transactionDtos
+            .Where(p => p.Amount > 0 && p.Account == TransactionAccount.NEEDS && !p.Description.Contains("ONLINE TRANSFER"))
+            .GroupBy(p => p.TransactionDate.HasValue ? p.TransactionDate.Value.Month : -1)
+            .Select(grp => new
+            {
+                MonthNum = grp.Key,
+                MonthlyTotal = grp.Sum(p => p.Amount.GetValueOrDefault()).ToString("C2"),
+            }).ToList();
+
+        reportList.ForEach(Console.WriteLine);
+    }
+
+    private static long BulkInsertFromSheet(Secrets secrets, IMapper _mapper)
+    {
+        var googleSheetApiClient = Helper.InitializeSheetService(ApplicationName, Scopes);
+        var googleSheetReader = new GoogleSheetReader(_mapper, new GoogleSheetClient(googleSheetApiClient));
+        var billTransactionDtos = GetBillTransactions(secrets.BillTransactionSheets.FirstOrDefault(), googleSheetReader);
 
         // dbconnection manager
         var connManager = new MySqlDbConnectionManager(secrets.ConnectionString);
         var daoDb = new BillTransactionDaoDb(connManager, _mapper);
 
-        var testList = daoDb.GetList(TransactionType.DEBIT);
+        return daoDb.BulkInsert(billTransactionDtos);
     }
 
     private static List<BillTransactionDto> GetBillTransactions(BillTransactionSheet transactionSheet, GoogleSheetReader googleSheetReader)
@@ -64,14 +83,9 @@ public static class MyFireDemo
         transactionList.AddRange(needsCardTransactions);
         transactionList.AddRange(wantsCardTransactions);
 
-        Console.WriteLine($"Total Bill Transactions Written: {transactionList.Count()}");
+        Console.WriteLine($"Total Bill Transactions Read: {transactionList.Count()}");
 
         return transactionList;
-    }
-
-    private static long BulkInsert(IBillTransactionDao billTransactionDao, IEnumerable<BillTransactionDto> list)
-    {
-        return billTransactionDao.BulkInsert(list);
     }
 
     private static bool TestDbConnection(IDbConnectionManager dbConnectionManager)

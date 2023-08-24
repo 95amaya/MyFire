@@ -30,7 +30,7 @@ public class BillTransactionDbo
     [Key]
     public int? id { get; set; }
     public DateTime? transaction_date { get; set; }
-    public double? amount { get; set; }
+    public decimal? amount { get; set; }
     public string? description { get; set; }
     public string? transaction_type { get; set; }
     public string? transaction_account { get; set; }
@@ -45,7 +45,7 @@ public class BillTransactionDto
 {
     public int? Id { get; set; }
     public DateTime? TransactionDate { get; set; }
-    public double? Amount { get; set; }
+    public decimal? Amount { get; set; }
     public string? Description { get; set; }
     public TransactionType? Type { get; set; }
     public TransactionAccount? Account { get; set; }
