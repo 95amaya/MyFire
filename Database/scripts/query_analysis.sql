@@ -5,6 +5,14 @@ from bill_transactions
 ORDER BY transaction_date DESC
 LIMIT 100;
 
+SELECT *
+from bill_transactions
+WHERE
+    transaction_date >= '2023-07-01'
+    AND (description LIKE '%PAYMENT%')
+ORDER BY transaction_date DESC
+LIMIT 100;
+
 SELECT
     MONTH(transaction_date) as month_num,
     transaction_type,

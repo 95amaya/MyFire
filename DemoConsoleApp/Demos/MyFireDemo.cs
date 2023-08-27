@@ -33,8 +33,8 @@ public static class MyFireDemo
         var daoDb = new BillTransactionDaoDb(connManager, _mapper);
         // var transactionDtos = daoDb.Get(new DateTime(2023, 1, 1));
 
-        var transactionDtos = daoDb.Get(new DateTime(2023, 7, 31));
-        var testBool = transactionDtos.Where(p => p.IsNoise.GetValueOrDefault());
+        // var transactionDtos = daoDb.Get(new DateTime(2023, 7, 31));
+        // var testBool = transactionDtos.Where(p => p.IsNoise.GetValueOrDefault());
 
         // var oneMonthRawList = transactionDtos.Where(p => p.TransactionDate.GetValueOrDefault().Month == 1).ToList();
 

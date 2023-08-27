@@ -2,6 +2,7 @@ DemoConsoleApp/token.json
 DemoConsoleApp/secrets.json
 output/
 mysqldb/
+secrets.sql
 
 #Ignore thumbnails created by Windows
 Thumbs.db
