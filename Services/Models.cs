@@ -34,6 +34,7 @@ public class BillTransactionDbo
     public string? description { get; set; }
     public string? transaction_type { get; set; }
     public string? transaction_account { get; set; }
+    public bool? is_noise { get; set; }
 }
 
 public class BillTransactionDboFilter : BillTransactionDbo
@@ -50,6 +51,7 @@ public class BillTransactionDto
     public string? Description { get; set; }
     public TransactionType? Type { get; set; }
     public TransactionAccount? Account { get; set; }
+    public bool? IsNoise { get; set; }
 
     public BillTransactionDto() { }
 

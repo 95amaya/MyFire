@@ -16,17 +16,25 @@ public static class MyFireDemo
     // If modifying these scopes, delete your previously saved credentials
     // at ~/credentials.json
     // spreadsheet is defined locally by creating a ~/secrets.json file and storing a "SheetId" to retrieve
-    static string[] Scopes = { SheetsService.Scope.Spreadsheets };
-    static string ApplicationName = "MyFire Google Sheets API Demo";
+    static readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
+    static readonly string ApplicationName = "MyFire Google Sheets API Demo";
 
     public static void Run(string[] args, Secrets secrets)
     {
         var _mapper = InitializeAutomapper();
         SimpleCRUD.SetDialect(SimpleCRUD.Dialect.MySQL);
 
+        // var insertCnt = BulkInsertFromSheet(secrets, _mapper);
+        // Console.WriteLine($"{insertCnt} Transactions Written");
+        // var test = transactionDtos.Count();
+
+
         var connManager = new MySqlDbConnectionManager(secrets.ConnectionString);
         var daoDb = new BillTransactionDaoDb(connManager, _mapper);
-        var transactionDtos = daoDb.Get(new DateTime(2023, 1, 1));
+        // var transactionDtos = daoDb.Get(new DateTime(2023, 1, 1));
+
+        var transactionDtos = daoDb.Get(new DateTime(2023, 7, 31));
+        var testBool = transactionDtos.Where(p => p.IsNoise.GetValueOrDefault());
 
         // var oneMonthRawList = transactionDtos.Where(p => p.TransactionDate.GetValueOrDefault().Month == 1).ToList();
 
@@ -48,7 +56,6 @@ public static class MyFireDemo
 
         // reportList.ForEach(Console.WriteLine);
 
-        var test = transactionDtos.Count();
     }
 
     private static long BulkInsertFromSheet(Secrets secrets, IMapper _mapper)
@@ -132,6 +139,7 @@ public static class MyFireDemo
                 .ForMember(dest => dest.transaction_account, act => act.Ignore())
                 .ForMember(dest => dest.transaction_type, act => act.MapFrom(src => src.Type.ToString()))
                 .ForMember(dest => dest.transaction_account, act => act.MapFrom(src => src.Account.ToString()))
+                .ForMember(dest => dest.is_noise, act => act.MapFrom(src => src.IsNoise))
                 .ReverseMap()
                 .ForPath(dest => dest.Type, act => act.MapFrom(src => Enum.Parse<TransactionType>(src.transaction_type)))
                 .ForPath(dest => dest.Account, act => act.MapFrom(src => Enum.Parse<TransactionAccount>(src.transaction_account)));
