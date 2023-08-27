@@ -39,6 +39,7 @@ public class BillTransactionDbo
 public class BillTransactionDboFilter : BillTransactionDbo
 {
     public string GetTransactionTypeFilterStr(string propName) => $" {nameof(transaction_type)} = @{propName} ";
+    public string GetTransactionDateFilterStr(string propName) => $" {nameof(transaction_date)} >= @{propName} ";
 }
 
 public class BillTransactionDto

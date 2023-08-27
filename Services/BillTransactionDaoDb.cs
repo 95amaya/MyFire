@@ -26,12 +26,12 @@ public class BillTransactionDaoDb : IBillTransactionDao
         return dpExt.SqlMapperExtensions.Insert(conn, dboList);
     }
 
-    public IEnumerable<BillTransactionDto> GetList(TransactionType transactionType)
+    public IEnumerable<BillTransactionDto> Get(DateTime transactionDateInclusive)
     {
-        var whereClause = $" where {_filterHelper.GetTransactionTypeFilterStr(nameof(transactionType))} ";
+        var whereClause = $" where {_filterHelper.GetTransactionDateFilterStr(nameof(transactionDateInclusive))} ";
 
         using var conn = _dbConnectionManager.CreateConnection();
-        var billTransactionDbos = conn.GetList<BillTransactionDbo>(whereClause, new { transactionType = transactionType.ToString() });
+        var billTransactionDbos = conn.GetList<BillTransactionDbo>(whereClause, new { transactionDateInclusive });
 
         return _mapper.Map<IEnumerable<BillTransactionDto>>(billTransactionDbos);
     }

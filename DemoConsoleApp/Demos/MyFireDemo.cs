@@ -26,7 +26,7 @@ public static class MyFireDemo
 
         var connManager = new MySqlDbConnectionManager(secrets.ConnectionString);
         var daoDb = new BillTransactionDaoDb(connManager, _mapper);
-        var transactionDtos = daoDb.GetList(TransactionType.DEBIT);
+        var transactionDtos = daoDb.Get(new DateTime(2023, 1, 1));
 
         // var oneMonthRawList = transactionDtos.Where(p => p.TransactionDate.GetValueOrDefault().Month == 1).ToList();
 
@@ -37,16 +37,18 @@ public static class MyFireDemo
         // rawList.ForEach(Console.WriteLine);
         // Console.WriteLine(rawList.Sum(p => p.Amount.GetValueOrDefault()).ToString("C0"));
 
-        var reportList = transactionDtos
-            .Where(p => p.Amount > 0 && p.Account == TransactionAccount.NEEDS && !p.Description.Contains("ONLINE TRANSFER"))
-            .GroupBy(p => p.TransactionDate.HasValue ? p.TransactionDate.Value.Month : -1)
-            .Select(grp => new
-            {
-                MonthNum = grp.Key,
-                MonthlyTotal = grp.Sum(p => p.Amount.GetValueOrDefault()).ToString("C2"),
-            }).ToList();
+        // var reportList = transactionDtos
+        //     .Where(p => p.Amount > 0 && p.Account == TransactionAccount.NEEDS && !p.Description.Contains("ONLINE TRANSFER"))
+        //     .GroupBy(p => p.TransactionDate.HasValue ? p.TransactionDate.Value.Month : -1)
+        //     .Select(grp => new
+        //     {
+        //         MonthNum = grp.Key,
+        //         MonthlyTotal = grp.Sum(p => p.Amount.GetValueOrDefault()).ToString("C2"),
+        //     }).ToList();
 
-        reportList.ForEach(Console.WriteLine);
+        // reportList.ForEach(Console.WriteLine);
+
+        var test = transactionDtos.Count();
     }
 
     private static long BulkInsertFromSheet(Secrets secrets, IMapper _mapper)
