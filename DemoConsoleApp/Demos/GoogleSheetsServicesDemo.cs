@@ -27,7 +27,7 @@ public static class GoogleSheetsServicesDemo
         string spreadsheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms";
         string range = "Class Data!A2:E";
 
-        var students = googleSheetReader.ReadFrom<Student>(spreadsheetId, range);
+        var students = googleSheetReader.Read<Student>(spreadsheetId, range);
 
         // Prints the names and majors of students in a sample spreadsheet:
         // https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit

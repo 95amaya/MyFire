@@ -9,6 +9,8 @@ using Dapper;
 using Services.Models;
 using Services.CoreLibraries;
 using Services;
+using System.IO;
+using System.Globalization;
 
 namespace DemoConsoleApp.Demos;
 public static class MyFireDemo
@@ -24,13 +26,31 @@ public static class MyFireDemo
         var _mapper = InitializeAutomapper();
         SimpleCRUD.SetDialect(SimpleCRUD.Dialect.MySQL);
 
-        // var insertCnt = BulkInsertFromSheet(secrets, _mapper);
-        // Console.WriteLine($"{insertCnt} Transactions Written");
-        // var test = transactionDtos.Count();
+        // ---- BEGIN Run BillTransactions ETL ----
+        // var billTransactionDtos = GetBillTransactionsFromSheet(_mapper, secrets.BillTransactionSheets.FirstOrDefault());
+        var billTransactionDtos = GetBillTransactionsFromCsv(_mapper, secrets.ImportFiles);
 
-
+        // dbconnection manager
         var connManager = new MySqlDbConnectionManager(secrets.ConnectionString);
         var daoDb = new BillTransactionDaoDb(connManager, _mapper);
+
+        var insertCnt = daoDb.BulkInsert(billTransactionDtos);
+        Console.WriteLine($"{insertCnt} Transactions Written");
+        // ---- END Run BillTransactions ETL ----
+
+
+        // TODO: Copy whole / part of DB to Google Drive Sync Folder to preserve data
+        // -- What format makes sense here? (something easy to read in, csv) 
+        // TODO: Test Filtering out of Regex
+
+        // DateTime.TryParseExact("08/31/2023", "MM/dd/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var testConvert1);
+        // DateTime.TryParseExact("\"08/31/2023\"".Replace("\"", ""), "MM/dd/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var testConvert2);
+
+
+
+        // --- BEGIN REPORTING
+        // var connManager = new MySqlDbConnectionManager(secrets.ConnectionString);
+        // var daoDb = new BillTransactionDaoDb(connManager, _mapper);
         // var transactionDtos = daoDb.Get(new DateTime(2023, 1, 1));
 
         // var transactionDtos = daoDb.Get(new DateTime(2023, 7, 31));
@@ -58,40 +78,54 @@ public static class MyFireDemo
 
     }
 
-    private static long BulkInsertFromSheet(Secrets secrets, IMapper _mapper)
-    {
-        var googleSheetApiClient = Helper.InitializeSheetService(ApplicationName, Scopes);
-        var googleSheetReader = new GoogleSheetReader(_mapper, new GoogleSheetClient(googleSheetApiClient));
-        var billTransactionDtos = GetBillTransactions(secrets.BillTransactionSheets.FirstOrDefault(), googleSheetReader);
-
-        // dbconnection manager
-        var connManager = new MySqlDbConnectionManager(secrets.ConnectionString);
-        var daoDb = new BillTransactionDaoDb(connManager, _mapper);
-
-        return daoDb.BulkInsert(billTransactionDtos);
-    }
-
-    private static List<BillTransactionDto> GetBillTransactions(BillTransactionSheet transactionSheet, GoogleSheetReader googleSheetReader)
+    private static List<BillTransactionDto> GetBillTransactionsFromCsv(IMapper _mapper, BillTransactionImport import)
     {
         var transactionList = new List<BillTransactionDto>();
 
-        // read from google sheet
-        var needsCheckingTransactions = googleSheetReader.ReadFrom<WfNeedsCheckingBillTransactionDto>(transactionSheet.SheetId, transactionSheet.NeedsCheckingTransactionRange);
-        var wantsCheckingTransactions = googleSheetReader.ReadFrom<WfWantsCheckingBillTransactionDto>(transactionSheet.SheetId, transactionSheet.WantsCheckingTransactionRange);
-        var needsCardTransactions = googleSheetReader.ReadFrom<WfNeedsCardBillTransactionDto>(transactionSheet.SheetId, transactionSheet.NeedsCardTransactionRange);
-        var wantsCardTransactions = googleSheetReader.ReadFrom<JpmWantsCardBillTransactionDto>(transactionSheet.SheetId, transactionSheet.WantsCardTransactionRange);
+        var csvReader = new CsvReader(_mapper);
+        var needsDebitTransactions = csvReader.Read<WfNeedsDebitBillTransactionDto>(import.NeedsDebitPath);
+        var wantsDebitTransactions = csvReader.Read<WfWantsDebitBillTransactionDto>(import.WantsDebitPath);
+        var needsCreditTransactions = csvReader.Read<WfNeedsCreditBillTransactionDto>(import.NeedsCreditPath);
+        var wantsCreditTransactions = csvReader.Read<JpmWantsCreditBillTransactionDto>(import.WantsCreditPath, skipFirstRow: true);
 
-        // Prints my transactions from spreadsheet
-        PrintSampleOfDataSet("NEEDS CHECKING Sample", needsCheckingTransactions.Cast<BillTransactionDto>());
-        PrintSampleOfDataSet("WANTS CHECKING Sample", wantsCheckingTransactions.Cast<BillTransactionDto>());
-        PrintSampleOfDataSet("NEEDS CARD Sample", needsCardTransactions.Cast<BillTransactionDto>());
-        PrintSampleOfDataSet("WANTS CARD Sample", wantsCardTransactions.Cast<BillTransactionDto>());
+        // Prints sample transactions
+        PrintSampleOfDataSet("NEEDS DEBIT Sample", needsDebitTransactions.Cast<BillTransactionDto>());
+        PrintSampleOfDataSet("WANTS DEBIT Sample", wantsDebitTransactions.Cast<BillTransactionDto>());
+        PrintSampleOfDataSet("NEEDS CREDIT Sample", needsCreditTransactions.Cast<BillTransactionDto>());
+        PrintSampleOfDataSet("WANTS CREDIT Sample", wantsCreditTransactions.Cast<BillTransactionDto>());
 
-        transactionList.AddRange(needsCheckingTransactions);
-        transactionList.AddRange(wantsCheckingTransactions);
-        transactionList.AddRange(needsCardTransactions);
-        transactionList.AddRange(wantsCardTransactions);
+        transactionList.AddRange(needsDebitTransactions);
+        transactionList.AddRange(wantsDebitTransactions);
+        transactionList.AddRange(needsCreditTransactions);
+        transactionList.AddRange(wantsCreditTransactions);
+        Console.WriteLine($"Total Bill Transactions Read: {transactionList.Count()}");
 
+        // Need to transform to add Is Noise before returning
+
+        return transactionList;
+    }
+
+    private static List<BillTransactionDto> GetBillTransactionsFromSheet(IMapper _mapper, BillTransactionSheet transactionSheet)
+    {
+        var transactionList = new List<BillTransactionDto>();
+
+        var googleSheetApiClient = Helper.InitializeSheetService(ApplicationName, Scopes);
+        var googleSheetReader = new GoogleSheetReader(_mapper, new GoogleSheetClient(googleSheetApiClient));
+        var needsDebitTransactions = googleSheetReader.Read<WfNeedsDebitBillTransactionDto>(transactionSheet.SheetId, transactionSheet.NeedsDebitTransactionRange);
+        var wantsDebitTransactions = googleSheetReader.Read<WfWantsDebitBillTransactionDto>(transactionSheet.SheetId, transactionSheet.WantsDebitTransactionRange);
+        var needsCreditTransactions = googleSheetReader.Read<WfNeedsCreditBillTransactionDto>(transactionSheet.SheetId, transactionSheet.NeedsCreditTransactionRange);
+        var wantsCreditTransactions = googleSheetReader.Read<JpmWantsCreditBillTransactionDto>(transactionSheet.SheetId, transactionSheet.WantsCreditTransactionRange);
+
+        // Prints sample transactions
+        PrintSampleOfDataSet("NEEDS DEBIT Sample", needsDebitTransactions.Cast<BillTransactionDto>());
+        PrintSampleOfDataSet("WANTS DEBIT Sample", wantsDebitTransactions.Cast<BillTransactionDto>());
+        PrintSampleOfDataSet("NEEDS CREDIT Sample", needsCreditTransactions.Cast<BillTransactionDto>());
+        PrintSampleOfDataSet("WANTS CREDIT Sample", wantsCreditTransactions.Cast<BillTransactionDto>());
+
+        transactionList.AddRange(needsDebitTransactions);
+        transactionList.AddRange(wantsDebitTransactions);
+        transactionList.AddRange(needsCreditTransactions);
+        transactionList.AddRange(wantsCreditTransactions);
         Console.WriteLine($"Total Bill Transactions Read: {transactionList.Count()}");
 
         return transactionList;
@@ -111,23 +145,24 @@ public static class MyFireDemo
         var config = new MapperConfiguration(cfg =>
         {
             cfg.CreateMap<IList<object>, WfBillTransactionDto>()
-                .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => src[0]))
+                .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => DateTime.ParseExact(src[0] as string, "MM/dd/yyyy", CultureInfo.InvariantCulture)))
                 .ForMember(dest => dest.Amount, act => act.MapFrom(src => src[1]))
                 .ForMember(dest => dest.Description, act => act.MapFrom(src => src[4]));
 
-            cfg.CreateMap<IList<object>, WfNeedsCheckingBillTransactionDto>()
+
+            cfg.CreateMap<IList<object>, WfNeedsDebitBillTransactionDto>()
                 .IncludeBase<IList<object>, WfBillTransactionDto>();
-            cfg.CreateMap<IList<object>, WfWantsCheckingBillTransactionDto>()
+            cfg.CreateMap<IList<object>, WfWantsDebitBillTransactionDto>()
                 .IncludeBase<IList<object>, WfBillTransactionDto>();
-            cfg.CreateMap<IList<object>, WfNeedsCardBillTransactionDto>()
+            cfg.CreateMap<IList<object>, WfNeedsCreditBillTransactionDto>()
                 .IncludeBase<IList<object>, WfBillTransactionDto>();
 
             cfg.CreateMap<IList<object>, JpmBillTransactionDto>()
-                .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => src[0]))
+                .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => DateTime.ParseExact(src[0] as string, "MM/dd/yyyy", CultureInfo.InvariantCulture)))
                 .ForMember(dest => dest.Amount, act => act.MapFrom(src => src[5]))
                 .ForMember(dest => dest.Description, act => act.MapFrom(src => src[2]));
 
-            cfg.CreateMap<IList<object>, JpmWantsCardBillTransactionDto>()
+            cfg.CreateMap<IList<object>, JpmWantsCreditBillTransactionDto>()
                 .IncludeBase<IList<object>, JpmBillTransactionDto>();
 
             cfg.CreateMap<BillTransactionDto, BillTransactionDbo>()
@@ -135,8 +170,6 @@ public static class MyFireDemo
                 .ForMember(dest => dest.transaction_date, act => act.MapFrom(src => src.TransactionDate))
                 .ForMember(dest => dest.amount, act => act.MapFrom(src => src.Amount))
                 .ForMember(dest => dest.description, act => act.MapFrom(src => src.Description))
-                .ForMember(dest => dest.transaction_type, act => act.Ignore())
-                .ForMember(dest => dest.transaction_account, act => act.Ignore())
                 .ForMember(dest => dest.transaction_type, act => act.MapFrom(src => src.Type.ToString()))
                 .ForMember(dest => dest.transaction_account, act => act.MapFrom(src => src.Account.ToString()))
                 .ForMember(dest => dest.is_noise, act => act.MapFrom(src => src.IsNoise))

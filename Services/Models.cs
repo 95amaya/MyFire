@@ -6,10 +6,10 @@ namespace Services.Models;
 public class BillTransactionSheet
 {
     public string SheetId { get; set; } = string.Empty;
-    public string NeedsCheckingTransactionRange { get; set; } = string.Empty;
-    public string WantsCheckingTransactionRange { get; set; } = string.Empty;
-    public string NeedsCardTransactionRange { get; set; } = string.Empty;
-    public string WantsCardTransactionRange { get; set; } = string.Empty;
+    public string NeedsDebitTransactionRange { get; set; } = string.Empty;
+    public string WantsDebitTransactionRange { get; set; } = string.Empty;
+    public string NeedsCreditTransactionRange { get; set; } = string.Empty;
+    public string WantsCreditTransactionRange { get; set; } = string.Empty;
 }
 
 public enum TransactionType
@@ -34,7 +34,7 @@ public class BillTransactionDbo
     public string? description { get; set; }
     public string? transaction_type { get; set; }
     public string? transaction_account { get; set; }
-    public bool? is_noise { get; set; }
+    public bool is_noise { get; set; }
 }
 
 public class BillTransactionDboFilter : BillTransactionDbo
@@ -51,7 +51,7 @@ public class BillTransactionDto
     public string? Description { get; set; }
     public TransactionType? Type { get; set; }
     public TransactionAccount? Account { get; set; }
-    public bool? IsNoise { get; set; }
+    public bool IsNoise { get; set; }
 
     public BillTransactionDto() { }
 
@@ -78,19 +78,19 @@ public class JpmBillTransactionDto : BillTransactionDto
     public JpmBillTransactionDto(TransactionType type, TransactionAccount account) : base(type, account) { }
 }
 
-public class WfNeedsCheckingBillTransactionDto : WfBillTransactionDto
+public class WfNeedsDebitBillTransactionDto : WfBillTransactionDto
 {
-    public WfNeedsCheckingBillTransactionDto() : base(TransactionType.DEBIT, TransactionAccount.NEEDS) { }
+    public WfNeedsDebitBillTransactionDto() : base(TransactionType.DEBIT, TransactionAccount.NEEDS) { }
 }
-public class WfNeedsCardBillTransactionDto : WfBillTransactionDto
+public class WfNeedsCreditBillTransactionDto : WfBillTransactionDto
 {
-    public WfNeedsCardBillTransactionDto() : base(TransactionType.CREDIT, TransactionAccount.NEEDS) { }
+    public WfNeedsCreditBillTransactionDto() : base(TransactionType.CREDIT, TransactionAccount.NEEDS) { }
 }
-public class WfWantsCheckingBillTransactionDto : WfBillTransactionDto
+public class WfWantsDebitBillTransactionDto : WfBillTransactionDto
 {
-    public WfWantsCheckingBillTransactionDto() : base(TransactionType.DEBIT, TransactionAccount.WANTS) { }
+    public WfWantsDebitBillTransactionDto() : base(TransactionType.DEBIT, TransactionAccount.WANTS) { }
 }
-public class JpmWantsCardBillTransactionDto : JpmBillTransactionDto
+public class JpmWantsCreditBillTransactionDto : JpmBillTransactionDto
 {
-    public JpmWantsCardBillTransactionDto() : base(TransactionType.CREDIT, TransactionAccount.WANTS) { }
+    public JpmWantsCreditBillTransactionDto() : base(TransactionType.CREDIT, TransactionAccount.WANTS) { }
 }

@@ -12,7 +12,7 @@ public class GoogleSheetReader : ISheetReader
         _mapper = mapper;
     }
 
-    public IList<T> ReadFrom<T>(string spreadsheetId, string range)
+    public IList<T> Read<T>(string spreadsheetId, string range)
     where T : class, new()
     {
         var rawValues = _googleSheetsApiClient.GetValues(spreadsheetId, range);
