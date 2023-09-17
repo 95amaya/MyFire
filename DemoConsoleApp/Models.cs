@@ -14,6 +14,7 @@ public class Secrets
     private List<string> _currentDirArr = new() { Directory.GetCurrentDirectory() };
     public string TempFilePath => Path.Combine(_currentDirArr.Concat(TempFilePathArr).ToArray());
 
+    public List<string> BillTransactionNoiseFilterList { get; set; }
     public BillTransactionImport ImportFiles { get; set; }
 }
 

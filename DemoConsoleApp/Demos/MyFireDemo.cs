@@ -11,8 +11,13 @@ using Services.CoreLibraries;
 using Services;
 using System.IO;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace DemoConsoleApp.Demos;
+// TODO: use serilog for logging
+// TODO: ETL - populate IsNoise with Regex
+// -- What format makes sense here? (something easy to read in, csv) 
+// TODO: Copy whole / part of DB to Google Drive Sync Folder to preserve data
 public static class MyFireDemo
 {
     // If modifying these scopes, delete your previously saved credentials
@@ -27,31 +32,33 @@ public static class MyFireDemo
         SimpleCRUD.SetDialect(SimpleCRUD.Dialect.MySQL);
 
         // ---- BEGIN Run BillTransactions ETL ----
-        // var billTransactionDtos = GetBillTransactionsFromSheet(_mapper, secrets.BillTransactionSheets.FirstOrDefault());
-        var billTransactionDtos = GetBillTransactionsFromCsv(_mapper, secrets.ImportFiles);
-
-        // dbconnection manager
-        var connManager = new MySqlDbConnectionManager(secrets.ConnectionString);
-        var daoDb = new BillTransactionDaoDb(connManager, _mapper);
-
-        var insertCnt = daoDb.BulkInsert(billTransactionDtos);
-        Console.WriteLine($"{insertCnt} Transactions Written");
-        // ---- END Run BillTransactions ETL ----
-
-
-        // TODO: Copy whole / part of DB to Google Drive Sync Folder to preserve data
-        // -- What format makes sense here? (something easy to read in, csv) 
-        // TODO: Test Filtering out of Regex
-
         // DateTime.TryParseExact("08/31/2023", "MM/dd/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var testConvert1);
         // DateTime.TryParseExact("\"08/31/2023\"".Replace("\"", ""), "MM/dd/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var testConvert2);
 
+        // var billTransactionDtos = GetBillTransactionsFromSheet(_mapper, secrets.BillTransactionSheets.FirstOrDefault());
+        // var billTransactionDtos = GetBillTransactionsFromCsv(_mapper, secrets.ImportFiles, secrets.BillTransactionNoiseFilterList);
 
-
-        // --- BEGIN REPORTING
+        // // dbconnection manager
         // var connManager = new MySqlDbConnectionManager(secrets.ConnectionString);
         // var daoDb = new BillTransactionDaoDb(connManager, _mapper);
-        // var transactionDtos = daoDb.Get(new DateTime(2023, 1, 1));
+
+        // var insertCnt = daoDb.BulkInsert(billTransactionDtos);
+        // Console.WriteLine($"{insertCnt} Transactions Written");
+        // ---- END Run BillTransactions ETL ----
+
+        // Run aggregation report
+        RunReport(_mapper, secrets.ConnectionString, new DateTime(2023, 08, 01));
+
+    }
+
+    private static void RunReport(IMapper _mapper, string connectionString, DateTime sinceInclusive)
+    {
+        var connManager = new MySqlDbConnectionManager(connectionString);
+        var daoDb = new BillTransactionDaoDb(connManager, _mapper);
+        var transactionDtos = daoDb.Get(sinceInclusive);
+
+        var incomeTotal = transactionDtos.Where(p => p.Amount > 0 && p.Account == TransactionAccount.NEEDS).Sum(p => p.Amount.GetValueOrDefault()).ToString("C0");
+        Console.WriteLine($"income total: {incomeTotal}");
 
         // var transactionDtos = daoDb.Get(new DateTime(2023, 7, 31));
         // var testBool = transactionDtos.Where(p => p.IsNoise.GetValueOrDefault());
@@ -75,10 +82,9 @@ public static class MyFireDemo
         //     }).ToList();
 
         // reportList.ForEach(Console.WriteLine);
-
     }
 
-    private static List<BillTransactionDto> GetBillTransactionsFromCsv(IMapper _mapper, BillTransactionImport import)
+    private static List<BillTransactionDto> GetBillTransactionsFromCsv(IMapper _mapper, BillTransactionImport import, List<string> noiseFilterList)
     {
         var transactionList = new List<BillTransactionDto>();
 
@@ -101,6 +107,19 @@ public static class MyFireDemo
         Console.WriteLine($"Total Bill Transactions Read: {transactionList.Count()}");
 
         // Need to transform to add Is Noise before returning
+        transactionList.ForEach(item =>
+        {
+            foreach (var noiseFilter in noiseFilterList)
+            {
+                if (Regex.IsMatch(item.Description, noiseFilter))
+                {
+                    item.IsNoise = true;
+                    break;
+                }
+            }
+        });
+
+        PrintSampleOfDataSet("Noise List Sample", transactionList.Where(p => p.IsNoise).ToList());
 
         return transactionList;
     }
