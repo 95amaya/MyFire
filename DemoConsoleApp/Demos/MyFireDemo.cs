@@ -15,9 +15,11 @@ using System.Text.RegularExpressions;
 
 namespace DemoConsoleApp.Demos;
 // TODO: use serilog for logging
-// TODO: ETL - populate IsNoise with Regex
+// TODO: Get rid of SQL in favor of reading and writing to CSV Files (Need to take into account unique constraint)
+// TODO: Perform Regex on rest of SQL Data
 // -- What format makes sense here? (something easy to read in, csv) 
-// TODO: Copy whole / part of DB to Google Drive Sync Folder to preserve data
+// TODO: Copy whole / part of DB to Google Drive Sync Folder to preserve data (chunk by year)
+
 public static class MyFireDemo
 {
     // If modifying these scopes, delete your previously saved credentials
@@ -47,18 +49,39 @@ public static class MyFireDemo
         // ---- END Run BillTransactions ETL ----
 
         // Run aggregation report
-        RunReport(_mapper, secrets.ConnectionString, new DateTime(2023, 08, 01));
+        // Console.WriteLine(DateTime.Now.ToString("s"));
+        // Console.WriteLine(DateTime.Now.Date.ToString("s"));
+        // Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd"));
+        // Console.WriteLine(DateOnly.FromDateTime(DateTime.Now).ToString("s"));
+        RunReport(_mapper, secrets.ConnectionString, secrets.ExportFiles.DirPath, new DateTime(2022, 12, 01), secrets.BillTransactionNoiseFilterList);
 
     }
 
-    private static void RunReport(IMapper _mapper, string connectionString, DateTime sinceInclusive)
+    private static void RunReport(IMapper _mapper, string connectionString, string exportPath, DateTime sinceInclusive, List<string> noiseFilterList)
     {
         var connManager = new MySqlDbConnectionManager(connectionString);
         var daoDb = new BillTransactionDaoDb(connManager, _mapper);
+        var csvWriter = new CsvWriter();
         var transactionDtos = daoDb.Get(sinceInclusive);
 
-        var incomeTotal = transactionDtos.Where(p => p.Amount > 0 && p.Account == TransactionAccount.NEEDS).Sum(p => p.Amount.GetValueOrDefault()).ToString("C0");
-        Console.WriteLine($"income total: {incomeTotal}");
+        foreach (var item in transactionDtos)
+        {
+            foreach (var noiseFilter in noiseFilterList)
+            {
+                if (Regex.IsMatch(item.Description, noiseFilter))
+                {
+                    item.IsNoise = true;
+                    break;
+                }
+            }
+        };
+        var dbos = _mapper.Map<IEnumerable<BillTransactionDbo>>(transactionDtos.OrderBy(p => p.TransactionDate));
+
+        csvWriter.Write(Path.Combine(exportPath, "2023-BillTransactions.csv"), dbos);
+
+        // var incomeList = transactionDtos.Where(p => p.Amount > 0 && p.Account == TransactionAccount.NEEDS).ToList();
+        // incomeList.ForEach(Console.WriteLine);
+        // Console.WriteLine($"income total: {incomeList.Sum(p => p.Amount.GetValueOrDefault()):C0}");
 
         // var transactionDtos = daoDb.Get(new DateTime(2023, 7, 31));
         // var testBool = transactionDtos.Where(p => p.IsNoise.GetValueOrDefault());

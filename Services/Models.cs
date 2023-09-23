@@ -1,5 +1,6 @@
 
 using Dapper.Contrib.Extensions;
+using Services.CoreLibraries;
 
 namespace Services.Models;
 
@@ -25,7 +26,7 @@ public enum TransactionAccount
 }
 
 [Table("bill_transactions")]
-public class BillTransactionDbo
+public class BillTransactionDbo : ICsvRecord
 {
     [Key]
     public int? id { get; set; }
@@ -35,6 +36,10 @@ public class BillTransactionDbo
     public string? transaction_type { get; set; }
     public string? transaction_account { get; set; }
     public bool is_noise { get; set; }
+
+    public string GetCsvHeader() => $"Transaction Date,Amount,Transaction Type,Account,Description,Is Noise";
+
+    public string GetCsvRow() => $"{transaction_date?.Date.ToString("""yyyy-MM-dd""")},{amount},{transaction_type},{transaction_account},\"{description}\",{is_noise}";
 }
 
 public class BillTransactionDboFilter : BillTransactionDbo
@@ -42,8 +47,8 @@ public class BillTransactionDboFilter : BillTransactionDbo
     public string GetTransactionTypeFilterStr(string propName) => $" {nameof(transaction_type)} = @{propName} ";
     public string GetTransactionDateFilterStr(string propName) => $" {nameof(transaction_date)} >= @{propName} ";
     public string GetIsNoiseFilterStr(string propName) => $" {nameof(is_noise)} = @{propName} ";
-}
 
+}
 public class BillTransactionDto
 {
     public int? Id { get; set; }

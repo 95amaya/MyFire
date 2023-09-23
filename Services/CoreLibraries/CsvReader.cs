@@ -42,5 +42,4 @@ public class CsvReader : ICsvReader
 
         return recordList.Count() > 0 ? _mapper.Map<IList<T>>(recordList) : new List<T>();
     }
-
 }

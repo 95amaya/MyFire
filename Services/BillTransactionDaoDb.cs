@@ -30,11 +30,10 @@ public class BillTransactionDaoDb : IBillTransactionDao
     {
         var isNoise = !filterOutNoise;
         var whereClause = @$" where 
-            {_filterHelper.GetTransactionDateFilterStr(nameof(transactionDateInclusive))} AND 
-            {_filterHelper.GetIsNoiseFilterStr(nameof(isNoise))} ";
+            {_filterHelper.GetTransactionDateFilterStr(nameof(transactionDateInclusive))} ";
 
         using var conn = _dbConnectionManager.CreateConnection();
-        var billTransactionDbos = conn.GetList<BillTransactionDbo>(whereClause, new { transactionDateInclusive, isNoise });
+        var billTransactionDbos = conn.GetList<BillTransactionDbo>(whereClause, new { transactionDateInclusive });
 
         return _mapper.Map<IEnumerable<BillTransactionDto>>(billTransactionDbos);
     }

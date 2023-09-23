@@ -9,13 +9,10 @@ public class Secrets
 {
     public List<BillTransactionSheet> BillTransactionSheets { get; set; }
     public string ConnectionString { get; set; }
-    public IEnumerable<string> TempFilePathArr { get; set; }
-
-    private List<string> _currentDirArr = new() { Directory.GetCurrentDirectory() };
-    public string TempFilePath => Path.Combine(_currentDirArr.Concat(TempFilePathArr).ToArray());
 
     public List<string> BillTransactionNoiseFilterList { get; set; }
     public BillTransactionImport ImportFiles { get; set; }
+    public BillTransactionExport ExportFiles { get; set; }
 }
 
 public class BillTransactionImport
@@ -35,4 +32,12 @@ public class BillTransactionFiles
     public string WantsCredit { get; set; }
     public string NeedsDebit { get; set; }
     public string WantsDebit { get; set; }
+}
+
+public class BillTransactionExport
+{
+    private List<string> _currentDirArr = new() { Directory.GetCurrentDirectory() };
+    public IEnumerable<string> PathArr { get; set; }
+
+    public string DirPath => Path.Combine(_currentDirArr.Concat(PathArr).ToArray());
 }
