@@ -13,10 +13,8 @@ using System.IO;
 
 namespace DemoConsoleApp.Demos;
 // TODO: use serilog for logging
-// TODO: Get rid of SQL in favor of reading and writing to CSV Files (Need to take into account unique constraint)
-// TODO: Perform Regex on rest of SQL Data
-// -- What format makes sense here? (something easy to read in, csv) 
-// TODO: Copy whole / part of DB to Google Drive Sync Folder to preserve data (chunk by year)
+// TODO: CSV File unique constraint validator
+// TODO: Build Report to verify Data, what format to use here?
 
 public static class MyFireDemo
 {
@@ -35,31 +33,34 @@ public static class MyFireDemo
         // DateTime.TryParseExact("\"08/31/2023\"".Replace("\"", ""), "MM/dd/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var testConvert2);
 
         // Extract
-        var billTransactionDtos = GetBillTransactionsFromSheet(_mapper, secrets.ImportSheet);
-        // var billTransactionDtos = GetBillTransactionsFromCsv(_mapper, secrets.ImportFiles, secrets.BillTransactionNoiseFilterList);
+        // var billTransactionDtos = GetBillTransactionsFromSheet(_mapper, secrets.ImportSheet);
+        var srcDtos = GetBillTransactionsFromCsv(_mapper, secrets.PastFiles.File2023Path); // TODO: Read from Saved File Drive MyFireExport, fix automapper issue 
+        var billTransactionDtos = GetBillTransactionsFromCsv(_mapper, secrets.ImportFiles);
 
         // Transform
-        foreach (var item in billTransactionDtos)
-        {
-            foreach (var noiseFilter in secrets.BillTransactionNoiseFilterList)
-            {
-                if (Regex.IsMatch(item.Description, noiseFilter))
-                {
-                    item.IsNoise = true;
-                    break;
-                }
-            }
-        };
-        PrintSampleOfDataSet("Noise List Sample", billTransactionDtos.Where(p => p.IsNoise).ToList());
+        // TODO: Account for unique constraint before inserting.
+        // -- Maybe have an audit job that can be run independently? Job - verifies constraint for data accuracy
+        // foreach (var item in billTransactionDtos)
+        // {
+        //     foreach (var noiseFilter in secrets.BillTransactionNoiseFilterList)
+        //     {
+        //         if (Regex.IsMatch(item.Description, noiseFilter))
+        //         {
+        //             item.IsNoise = true;
+        //             break;
+        //         }
+        //     }
+        // };
+        // PrintSampleOfDataSet("Noise List Sample", billTransactionDtos.Where(p => p.IsNoise).ToList());
 
         var billtransactionCsvs = _mapper.Map<IEnumerable<BillTransactionCsv>>(billTransactionDtos.OrderBy(p => p.TransactionDate));
 
         // Load
         // // csv writer
-        var csvWriter = new CsvWriter();
+        // var csvWriter = new CsvWriter();
 
-        var cnt = csvWriter.Write(Path.Combine(secrets.ExportFiles.DirPath, "2020-BillTransactions.csv"), billtransactionCsvs);
-        Console.WriteLine($"{cnt} Transactions Written");
+        // var cnt = csvWriter.Write(Path.Combine(secrets.ExportFiles.DirPath, "2020-BillTransactions.csv"), billtransactionCsvs);
+        // Console.WriteLine($"{cnt} Transactions Written");
         // ---- END Run BillTransactions ETL ----
 
         // Run aggregation report
@@ -108,6 +109,11 @@ public static class MyFireDemo
         // reportList.ForEach(Console.WriteLine);
     }
 
+    private static List<BillTransactionDto> GetBillTransactionsFromCsv(IMapper _mapper, string path)
+    {
+        var csvReader = new CsvReader(_mapper);
+        return csvReader.Read<BillTransactionDto>(path).ToList();
+    }
     private static List<BillTransactionDto> GetBillTransactionsFromCsv(IMapper _mapper, BillTransactionImport import)
     {
         var transactionList = new List<BillTransactionDto>();
