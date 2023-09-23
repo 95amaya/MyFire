@@ -7,9 +7,7 @@ namespace DemoConsoleApp.Models;
 
 public class Secrets
 {
-    public List<BillTransactionSheet> BillTransactionSheets { get; set; }
-    public string ConnectionString { get; set; }
-
+    public BillTransactionSheet ImportSheet { get; set; }
     public List<string> BillTransactionNoiseFilterList { get; set; }
     public BillTransactionImport ImportFiles { get; set; }
     public BillTransactionExport ExportFiles { get; set; }

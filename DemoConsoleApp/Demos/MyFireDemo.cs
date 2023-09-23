@@ -9,6 +9,7 @@ using Services.Models;
 using Services.CoreLibraries;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using System.IO;
 
 namespace DemoConsoleApp.Demos;
 // TODO: use serilog for logging
@@ -33,15 +34,32 @@ public static class MyFireDemo
         // DateTime.TryParseExact("08/31/2023", "MM/dd/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var testConvert1);
         // DateTime.TryParseExact("\"08/31/2023\"".Replace("\"", ""), "MM/dd/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var testConvert2);
 
-        // var billTransactionDtos = GetBillTransactionsFromSheet(_mapper, secrets.BillTransactionSheets.FirstOrDefault());
+        // Extract
+        var billTransactionDtos = GetBillTransactionsFromSheet(_mapper, secrets.ImportSheet);
         // var billTransactionDtos = GetBillTransactionsFromCsv(_mapper, secrets.ImportFiles, secrets.BillTransactionNoiseFilterList);
 
-        // // dbconnection manager
-        // var connManager = new MySqlDbConnectionManager(secrets.ConnectionString);
-        // var daoDb = new BillTransactionDaoDb(connManager, _mapper);
+        // Transform
+        foreach (var item in billTransactionDtos)
+        {
+            foreach (var noiseFilter in secrets.BillTransactionNoiseFilterList)
+            {
+                if (Regex.IsMatch(item.Description, noiseFilter))
+                {
+                    item.IsNoise = true;
+                    break;
+                }
+            }
+        };
+        PrintSampleOfDataSet("Noise List Sample", billTransactionDtos.Where(p => p.IsNoise).ToList());
 
-        // var insertCnt = daoDb.BulkInsert(billTransactionDtos);
-        // Console.WriteLine($"{insertCnt} Transactions Written");
+        var billtransactionCsvs = _mapper.Map<IEnumerable<BillTransactionCsv>>(billTransactionDtos.OrderBy(p => p.TransactionDate));
+
+        // Load
+        // // csv writer
+        var csvWriter = new CsvWriter();
+
+        var cnt = csvWriter.Write(Path.Combine(secrets.ExportFiles.DirPath, "2020-BillTransactions.csv"), billtransactionCsvs);
+        Console.WriteLine($"{cnt} Transactions Written");
         // ---- END Run BillTransactions ETL ----
 
         // Run aggregation report
@@ -49,25 +67,15 @@ public static class MyFireDemo
         // Console.WriteLine(DateTime.Now.Date.ToString("s"));
         // Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd"));
         // Console.WriteLine(DateOnly.FromDateTime(DateTime.Now).ToString("s"));
-        RunReport(_mapper, secrets.ConnectionString, secrets.ExportFiles.DirPath, new DateTime(2022, 12, 01), secrets.BillTransactionNoiseFilterList);
+        RunReport(_mapper, secrets.ExportFiles.DirPath, new DateTime(2022, 12, 01));
 
     }
 
-    private static void RunReport(IMapper _mapper, string connectionString, string exportPath, DateTime sinceInclusive, List<string> noiseFilterList)
+    private static void RunReport(IMapper _mapper, string exportPath, DateTime sinceInclusive)
     {
         var csvWriter = new CsvWriter();
 
-        // foreach (var item in transactionDtos)
-        // {
-        //     foreach (var noiseFilter in noiseFilterList)
-        //     {
-        //         if (Regex.IsMatch(item.Description, noiseFilter))
-        //         {
-        //             item.IsNoise = true;
-        //             break;
-        //         }
-        //     }
-        // };
+
         // var dbos = _mapper.Map<IEnumerable<BillTransactionDbo>>(transactionDtos.OrderBy(p => p.TransactionDate));
 
         // csvWriter.Write(Path.Combine(exportPath, "2023-BillTransactions.csv"), dbos);
@@ -100,7 +108,7 @@ public static class MyFireDemo
         // reportList.ForEach(Console.WriteLine);
     }
 
-    private static List<BillTransactionDto> GetBillTransactionsFromCsv(IMapper _mapper, BillTransactionImport import, List<string> noiseFilterList)
+    private static List<BillTransactionDto> GetBillTransactionsFromCsv(IMapper _mapper, BillTransactionImport import)
     {
         var transactionList = new List<BillTransactionDto>();
 
@@ -122,20 +130,6 @@ public static class MyFireDemo
         transactionList.AddRange(wantsCreditTransactions);
         Console.WriteLine($"Total Bill Transactions Read: {transactionList.Count()}");
 
-        // Need to transform to add Is Noise before returning
-        transactionList.ForEach(item =>
-        {
-            foreach (var noiseFilter in noiseFilterList)
-            {
-                if (Regex.IsMatch(item.Description, noiseFilter))
-                {
-                    item.IsNoise = true;
-                    break;
-                }
-            }
-        });
-
-        PrintSampleOfDataSet("Noise List Sample", transactionList.Where(p => p.IsNoise).ToList());
 
         return transactionList;
     }
