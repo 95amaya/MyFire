@@ -45,7 +45,7 @@ public class GoogleSheetReaderTests
         var googleSheetReader = new GoogleSheetReader(_mockMapper.Object, _mockSheetClient.Object);
 
         // act
-        var data = googleSheetReader.ReadFrom<TestClass>(spreadsheetId, range);
+        var data = googleSheetReader.Read<TestClass>(spreadsheetId, range);
 
         // assert
         data.Should().Equal(expectedDataList);
@@ -75,7 +75,7 @@ public class GoogleSheetReaderTests
         var googleSheetReader = new GoogleSheetReader(_mockMapper.Object, _mockSheetClient.Object);
 
         // act
-        var data = googleSheetReader.ReadFrom<TestClass>(spreadsheetId, range);
+        var data = googleSheetReader.Read<TestClass>(spreadsheetId, range);
 
         // assert
         data.Should().BeEmpty();

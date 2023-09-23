@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Services;
 using Services.Models;
 
 namespace WebApp.Controllers;
@@ -8,13 +7,11 @@ namespace WebApp.Controllers;
 [Route("api/[controller]")]
 public class BillTransactionController : ControllerBase
 {
-    private readonly IBillTransactionDao _billTransactionDao;
     private readonly ILogger<BillTransactionController> _logger;
 
-    public BillTransactionController(ILogger<BillTransactionController> logger, IBillTransactionDao billTransactionDao)
+    public BillTransactionController(ILogger<BillTransactionController> logger)
     {
         _logger = logger;
-        _billTransactionDao = billTransactionDao;
     }
 
 
@@ -24,7 +21,6 @@ public class BillTransactionController : ControllerBase
         return new List<BillTransactionDto>() {
             new BillTransactionDto()
             {
-                Id = 1,
                 TransactionDate = DateTime.Now,
                 Amount = -50,
                 Description = "TX ROADHOUSE",
@@ -33,7 +29,6 @@ public class BillTransactionController : ControllerBase
             },
             new BillTransactionDto()
             {
-                Id = 2,
                 TransactionDate = DateTime.Now,
                 Amount = 1200,
                 Description = "Bullhorn",

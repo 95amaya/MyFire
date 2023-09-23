@@ -9,13 +9,6 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(Program));
 
-builder.Services.AddSingleton<IDbConnectionManager, MySqlDbConnectionManager>((serviceProvider) =>
-{
-    var connectionString = builder.Configuration.GetConnectionString("MySqlLocal") ?? string.Empty;
-    return new MySqlDbConnectionManager(connectionString);
-});
-builder.Services.AddSingleton<IBillTransactionDao, BillTransactionDaoDb>();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

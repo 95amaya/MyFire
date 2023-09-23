@@ -5,11 +5,8 @@ using CoreLibraries;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Dapper;
 using Services.Models;
 using Services.CoreLibraries;
-using Services;
-using System.IO;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -31,7 +28,6 @@ public static class MyFireDemo
     public static void Run(string[] args, Secrets secrets)
     {
         var _mapper = InitializeAutomapper();
-        SimpleCRUD.SetDialect(SimpleCRUD.Dialect.MySQL);
 
         // ---- BEGIN Run BillTransactions ETL ----
         // DateTime.TryParseExact("08/31/2023", "MM/dd/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var testConvert1);
@@ -59,25 +55,22 @@ public static class MyFireDemo
 
     private static void RunReport(IMapper _mapper, string connectionString, string exportPath, DateTime sinceInclusive, List<string> noiseFilterList)
     {
-        var connManager = new MySqlDbConnectionManager(connectionString);
-        var daoDb = new BillTransactionDaoDb(connManager, _mapper);
         var csvWriter = new CsvWriter();
-        var transactionDtos = daoDb.Get(sinceInclusive);
 
-        foreach (var item in transactionDtos)
-        {
-            foreach (var noiseFilter in noiseFilterList)
-            {
-                if (Regex.IsMatch(item.Description, noiseFilter))
-                {
-                    item.IsNoise = true;
-                    break;
-                }
-            }
-        };
-        var dbos = _mapper.Map<IEnumerable<BillTransactionDbo>>(transactionDtos.OrderBy(p => p.TransactionDate));
+        // foreach (var item in transactionDtos)
+        // {
+        //     foreach (var noiseFilter in noiseFilterList)
+        //     {
+        //         if (Regex.IsMatch(item.Description, noiseFilter))
+        //         {
+        //             item.IsNoise = true;
+        //             break;
+        //         }
+        //     }
+        // };
+        // var dbos = _mapper.Map<IEnumerable<BillTransactionDbo>>(transactionDtos.OrderBy(p => p.TransactionDate));
 
-        csvWriter.Write(Path.Combine(exportPath, "2023-BillTransactions.csv"), dbos);
+        // csvWriter.Write(Path.Combine(exportPath, "2023-BillTransactions.csv"), dbos);
 
         // var incomeList = transactionDtos.Where(p => p.Amount > 0 && p.Account == TransactionAccount.NEEDS).ToList();
         // incomeList.ForEach(Console.WriteLine);
@@ -173,15 +166,6 @@ public static class MyFireDemo
         return transactionList;
     }
 
-    private static bool TestDbConnection(IDbConnectionManager dbConnectionManager)
-    {
-        var sql = "SELECT CURDATE();";
-
-        using var connection = dbConnectionManager.CreateConnection();
-        var retVal = connection.QueryFirstOrDefault<DateTime>(sql);
-        Console.WriteLine($"Mysql Connection Test Output: {retVal}");
-        return true;
-    }
     private static IMapper InitializeAutomapper()
     {
         var config = new MapperConfiguration(cfg =>
@@ -207,8 +191,7 @@ public static class MyFireDemo
             cfg.CreateMap<IList<object>, JpmWantsCreditBillTransactionDto>()
                 .IncludeBase<IList<object>, JpmBillTransactionDto>();
 
-            cfg.CreateMap<BillTransactionDto, BillTransactionDbo>()
-                .ForMember(dest => dest.id, act => act.MapFrom(src => src.Id))
+            cfg.CreateMap<BillTransactionDto, BillTransactionCsv>()
                 .ForMember(dest => dest.transaction_date, act => act.MapFrom(src => src.TransactionDate))
                 .ForMember(dest => dest.amount, act => act.MapFrom(src => src.Amount))
                 .ForMember(dest => dest.description, act => act.MapFrom(src => src.Description))
