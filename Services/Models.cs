@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Services.CoreLibraries;
 
 namespace Services.Models;
@@ -36,6 +37,28 @@ public class BillTransactionCsv : ICsvRecord
     public string GetCsvHeader() => $"Transaction Date,Amount,Transaction Type,Account,Description,Is Noise";
 
     public string GetCsvRow() => $"{transaction_date?.Date.ToString("""yyyy-MM-dd""")},{amount},{transaction_type},{transaction_account},\"{description}\",{is_noise}";
+}
+
+public class UniqueBillTransactionCsv : EqualityComparer<BillTransactionCsv>
+{
+    public override bool Equals(BillTransactionCsv? x, BillTransactionCsv? y)
+    {
+        if (x == null && y == null)
+            return true;
+        else if (x == null || y == null)
+            return false;
+
+        var hasSameDescription = (x.description == null && y.description == null) || (x.description != null && y.description != null && x.description.Equals(y.description));
+
+        return x.transaction_date == y.transaction_date &&
+                x.amount == y.amount &&
+                hasSameDescription;
+    }
+
+    public override int GetHashCode([DisallowNull] BillTransactionCsv obj)
+    {
+        return (obj.transaction_date.GetValueOrDefault().GetHashCode() ^ obj.amount.GetValueOrDefault().GetHashCode() ^ (obj.description ?? string.Empty).GetHashCode()).GetHashCode();
+    }
 }
 
 public class BillTransactionDto

@@ -10,14 +10,13 @@ public class CsvReader : ICsvReader
         _mapper = mapper;
     }
 
-    public IList<T> Read<T>(string path, bool skipFirstRow = false) where T : class, new()
+    public IList<T> Read<T>(StreamReader reader, bool skipFirstRow = false) where T : class, new()
     {
         List<List<object>> recordList = new();
-        using var reader = new StreamReader(path);
         while (!reader.EndOfStream)
         {
             List<object> record = new();
-            var line = reader.ReadLine();
+            var line = reader.ReadLine() ?? string.Empty;
 
             if (skipFirstRow)
             {
@@ -25,18 +24,37 @@ public class CsvReader : ICsvReader
                 continue;
             }
 
-            foreach (var value in line?.Split(',') ?? new string[] { })
+            if (line.Length <= 0)
             {
-                // remove beginning and ending quotes "1" => 1
-                if (value.Length > 1 && value.FirstOrDefault() == '"' && value.LastOrDefault() == '"')
+                continue;
+            }
+
+            var charIndex = 0;
+
+            while (charIndex < line.Length)
+            {
+                if (line.ElementAt(charIndex) == '"')
                 {
-                    record.Add(value[1..^1]);
+                    charIndex++; // skip " char
+                    var endIndex = line.IndexOf('"', charIndex);
+                    record.Add(line[charIndex..endIndex]);
+
+                    charIndex = endIndex + 2; // skip ",
                 }
                 else
                 {
-                    record.Add(value);
+                    var endIndex = line.IndexOf(',', charIndex);
+                    if (endIndex < 0)
+                    {
+                        endIndex = line.Length;
+                    }
+
+                    record.Add(line[charIndex..endIndex]);
+
+                    charIndex = endIndex + 1; // skip ,
                 }
             }
+
             recordList.Add(record);
         }
 

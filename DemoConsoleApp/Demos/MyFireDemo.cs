@@ -10,10 +10,11 @@ using Services.CoreLibraries;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.IO;
+using DemoConsoleApp.Mappings;
+using System.IO.Compression;
 
 namespace DemoConsoleApp.Demos;
 // TODO: use serilog for logging
-// TODO: CSV File unique constraint validator
 // TODO: Build Report to verify Data, what format to use here?
 
 public static class MyFireDemo
@@ -26,40 +27,39 @@ public static class MyFireDemo
 
     public static void Run(string[] args, Secrets secrets)
     {
-        var _mapper = InitializeAutomapper();
+        var _importMapper = InitializeAutomapper();
 
         // ---- BEGIN Run BillTransactions ETL ----
         // DateTime.TryParseExact("08/31/2023", "MM/dd/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var testConvert1);
         // DateTime.TryParseExact("\"08/31/2023\"".Replace("\"", ""), "MM/dd/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var testConvert2);
 
         // Extract
-        // var billTransactionDtos = GetBillTransactionsFromSheet(_mapper, secrets.ImportSheet);
-        var srcDtos = GetBillTransactionsFromCsv(_mapper, secrets.PastFiles.File2023Path); // TODO: Read from Saved File Drive MyFireExport, fix automapper issue 
-        var billTransactionDtos = GetBillTransactionsFromCsv(_mapper, secrets.ImportFiles);
+        var importCsvReader = new CsvReader(_importMapper);
+        var srcCsvs = GetBillTransactionsFromCsv<BillTransactionCsv>(importCsvReader, secrets.PastFiles.File2023Path, skipFirstRow: true);
+        var billTransactionDtos = ImportBillTransactionsFromCsv(importCsvReader, secrets.ImportFiles);
+        var billtransactionCsvs = _importMapper.Map<IEnumerable<BillTransactionCsv>>(billTransactionDtos.OrderBy(p => p.TransactionDate));
+
 
         // Transform
-        // TODO: Account for unique constraint before inserting.
-        // -- Maybe have an audit job that can be run independently? Job - verifies constraint for data accuracy
-        // foreach (var item in billTransactionDtos)
+        var itemsToInsert = billtransactionCsvs.Except(srcCsvs, new UniqueBillTransactionCsv()).ToList();
+
+        // foreach (var item in itemsToInsert)
         // {
         //     foreach (var noiseFilter in secrets.BillTransactionNoiseFilterList)
         //     {
-        //         if (Regex.IsMatch(item.Description, noiseFilter))
+        //         if (Regex.IsMatch(item.description, noiseFilter))
         //         {
-        //             item.IsNoise = true;
+        //             item.is_noise = true;
         //             break;
         //         }
         //     }
         // };
-        // PrintSampleOfDataSet("Noise List Sample", billTransactionDtos.Where(p => p.IsNoise).ToList());
-
-        var billtransactionCsvs = _mapper.Map<IEnumerable<BillTransactionCsv>>(billTransactionDtos.OrderBy(p => p.TransactionDate));
+        // PrintSampleOfDataSet("Noise List Sample", itemsToInsert.Where(p => p.is_noise).ToList());
 
         // Load
-        // // csv writer
         // var csvWriter = new CsvWriter();
 
-        // var cnt = csvWriter.Write(Path.Combine(secrets.ExportFiles.DirPath, "2020-BillTransactions.csv"), billtransactionCsvs);
+        // var cnt = csvWriter.Write(Path.Combine(secrets.ExportFiles.DirPath, secrets.PastFiles.File2023), itemsToInsert);
         // Console.WriteLine($"{cnt} Transactions Written");
         // ---- END Run BillTransactions ETL ----
 
@@ -68,7 +68,7 @@ public static class MyFireDemo
         // Console.WriteLine(DateTime.Now.Date.ToString("s"));
         // Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd"));
         // Console.WriteLine(DateOnly.FromDateTime(DateTime.Now).ToString("s"));
-        RunReport(_mapper, secrets.ExportFiles.DirPath, new DateTime(2022, 12, 01));
+        // RunReport(_exportMapper, secrets.ExportFiles.DirPath, new DateTime(2022, 12, 01));
 
     }
 
@@ -109,20 +109,19 @@ public static class MyFireDemo
         // reportList.ForEach(Console.WriteLine);
     }
 
-    private static List<BillTransactionDto> GetBillTransactionsFromCsv(IMapper _mapper, string path)
+    private static List<T> GetBillTransactionsFromCsv<T>(CsvReader csvReader, string path, bool skipFirstRow = false) where T : class, new()
     {
-        var csvReader = new CsvReader(_mapper);
-        return csvReader.Read<BillTransactionDto>(path).ToList();
+        using var sr = new StreamReader(path);
+        return csvReader.Read<T>(sr, skipFirstRow).ToList();
     }
-    private static List<BillTransactionDto> GetBillTransactionsFromCsv(IMapper _mapper, BillTransactionImport import)
+    private static List<BillTransactionDto> ImportBillTransactionsFromCsv(CsvReader csvReader, BillTransactionImport import)
     {
         var transactionList = new List<BillTransactionDto>();
 
-        var csvReader = new CsvReader(_mapper);
-        var needsDebitTransactions = csvReader.Read<WfNeedsDebitBillTransactionDto>(import.NeedsDebitPath);
-        var wantsDebitTransactions = csvReader.Read<WfWantsDebitBillTransactionDto>(import.WantsDebitPath);
-        var needsCreditTransactions = csvReader.Read<WfNeedsCreditBillTransactionDto>(import.NeedsCreditPath);
-        var wantsCreditTransactions = csvReader.Read<JpmWantsCreditBillTransactionDto>(import.WantsCreditPath, skipFirstRow: true);
+        var needsDebitTransactions = GetBillTransactionsFromCsv<WfNeedsDebitBillTransactionDto>(csvReader, import.NeedsDebitPath);
+        var wantsDebitTransactions = GetBillTransactionsFromCsv<WfWantsDebitBillTransactionDto>(csvReader, import.WantsDebitPath);
+        var needsCreditTransactions = GetBillTransactionsFromCsv<WfNeedsCreditBillTransactionDto>(csvReader, import.NeedsCreditPath);
+        var wantsCreditTransactions = GetBillTransactionsFromCsv<JpmWantsCreditBillTransactionDto>(csvReader, import.WantsCreditPath, skipFirstRow: true);
 
         // Prints sample transactions
         PrintSampleOfDataSet("NEEDS DEBIT Sample", needsDebitTransactions.Cast<BillTransactionDto>());
@@ -170,37 +169,8 @@ public static class MyFireDemo
     {
         var config = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<IList<object>, WfBillTransactionDto>()
-                .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => DateTime.ParseExact(src[0] as string, "MM/dd/yyyy", CultureInfo.InvariantCulture)))
-                .ForMember(dest => dest.Amount, act => act.MapFrom(src => src[1]))
-                .ForMember(dest => dest.Description, act => act.MapFrom(src => src[4]));
-
-
-            cfg.CreateMap<IList<object>, WfNeedsDebitBillTransactionDto>()
-                .IncludeBase<IList<object>, WfBillTransactionDto>();
-            cfg.CreateMap<IList<object>, WfWantsDebitBillTransactionDto>()
-                .IncludeBase<IList<object>, WfBillTransactionDto>();
-            cfg.CreateMap<IList<object>, WfNeedsCreditBillTransactionDto>()
-                .IncludeBase<IList<object>, WfBillTransactionDto>();
-
-            cfg.CreateMap<IList<object>, JpmBillTransactionDto>()
-                .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => DateTime.ParseExact(src[0] as string, "MM/dd/yyyy", CultureInfo.InvariantCulture)))
-                .ForMember(dest => dest.Amount, act => act.MapFrom(src => src[5]))
-                .ForMember(dest => dest.Description, act => act.MapFrom(src => src[2]));
-
-            cfg.CreateMap<IList<object>, JpmWantsCreditBillTransactionDto>()
-                .IncludeBase<IList<object>, JpmBillTransactionDto>();
-
-            cfg.CreateMap<BillTransactionDto, BillTransactionCsv>()
-                .ForMember(dest => dest.transaction_date, act => act.MapFrom(src => src.TransactionDate))
-                .ForMember(dest => dest.amount, act => act.MapFrom(src => src.Amount))
-                .ForMember(dest => dest.description, act => act.MapFrom(src => src.Description))
-                .ForMember(dest => dest.transaction_type, act => act.MapFrom(src => src.Type.ToString()))
-                .ForMember(dest => dest.transaction_account, act => act.MapFrom(src => src.Account.ToString()))
-                .ForMember(dest => dest.is_noise, act => act.MapFrom(src => src.IsNoise))
-                .ReverseMap()
-                .ForPath(dest => dest.Type, act => act.MapFrom(src => Enum.Parse<TransactionType>(src.transaction_type)))
-                .ForPath(dest => dest.Account, act => act.MapFrom(src => Enum.Parse<TransactionAccount>(src.transaction_account)));
+            cfg.AddProfile<ImportMapProfile>();
+            cfg.AddProfile<TransformMapProfile>();
         });
         return config.CreateMapper();
     }
