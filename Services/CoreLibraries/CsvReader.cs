@@ -12,10 +12,10 @@ public class CsvReader : ICsvReader
 
     public IList<T> Read<T>(StreamReader reader, bool skipFirstRow = false) where T : class, new()
     {
-        List<List<object>> recordList = new();
+        List<List<string>> recordList = new();
         while (!reader.EndOfStream)
         {
-            List<object> record = new();
+            List<string> record = new();
             var line = reader.ReadLine() ?? string.Empty;
 
             if (skipFirstRow)

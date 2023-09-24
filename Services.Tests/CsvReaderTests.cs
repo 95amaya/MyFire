@@ -16,7 +16,7 @@ public class CsvReaderTests
     {
         _mapper = new MapperConfiguration(cfg =>
         {
-            _ = cfg.CreateMap<IEnumerable<object>, TestClass>()
+            _ = cfg.CreateMap<IEnumerable<string>, TestClass>()
                 .ForMember(dest => dest.DateProp, act => act.MapFrom(src => DateTime.ParseExact(src.ElementAtOrDefault(0) as string, "yyyy-MM-dd", CultureInfo.InvariantCulture)))
                 .ForMember(dest => dest.DecimalProp, act => act.MapFrom(src => src.ElementAt(1)))
                 .ForMember(dest => dest.EnumProp, act => act.MapFrom(src => Enum.Parse<TestEnum>(src.ElementAtOrDefault(2) as string)))
@@ -28,6 +28,7 @@ public class CsvReaderTests
     [Theory]
     [InlineData(0, @"2023-08-03,-25.44,FOO,""foo-bar #1234"",True")]
     [InlineData(1, @"2023-08-03,25.44,BAR,""foo-bar #1234, comma""")]
+    [InlineData(2, @"2023-08-03,,,""foo-bar #1234, comma""")] // FIX: Failing test
     public void ShouldReadCsvRow(int index, string row)
     {
         // setup
@@ -69,7 +70,15 @@ public class CsvReaderTests
             EnumProp = TestEnum.BAR,
             StringProp = "foo-bar #1234, comma",
             BoolProp = false
-        }
+        },
+        new TestClass
+        {
+            DateProp = new DateTime(2023, 08, 03),
+            DecimalProp = 0,
+            EnumProp = TestEnum.BAR,
+            StringProp = "foo-bar #1234, comma",
+            BoolProp = false
+        },
     };
 
     public enum TestEnum

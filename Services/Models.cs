@@ -24,43 +24,6 @@ public enum TransactionAccount
     WANTS = 1,
 }
 
-// TODO: Update This now that it doesn't need to be DB compliant
-public class BillTransactionCsv : ICsvRecord
-{
-    public DateTime? transaction_date { get; set; }
-    public decimal? amount { get; set; }
-    public string? description { get; set; }
-    public string? transaction_type { get; set; }
-    public string? transaction_account { get; set; }
-    public bool is_noise { get; set; }
-
-    public string GetCsvHeader() => $"Transaction Date,Amount,Transaction Type,Account,Description,Is Noise";
-
-    public string GetCsvRow() => $"{transaction_date?.Date.ToString("""yyyy-MM-dd""")},{amount},{transaction_type},{transaction_account},\"{description}\",{is_noise}";
-}
-
-public class UniqueBillTransactionCsv : EqualityComparer<BillTransactionCsv>
-{
-    public override bool Equals(BillTransactionCsv? x, BillTransactionCsv? y)
-    {
-        if (x == null && y == null)
-            return true;
-        else if (x == null || y == null)
-            return false;
-
-        var hasSameDescription = (x.description == null && y.description == null) || (x.description != null && y.description != null && x.description.Equals(y.description));
-
-        return x.transaction_date == y.transaction_date &&
-                x.amount == y.amount &&
-                hasSameDescription;
-    }
-
-    public override int GetHashCode([DisallowNull] BillTransactionCsv obj)
-    {
-        return (obj.transaction_date.GetValueOrDefault().GetHashCode() ^ obj.amount.GetValueOrDefault().GetHashCode() ^ (obj.description ?? string.Empty).GetHashCode()).GetHashCode();
-    }
-}
-
 public class BillTransactionDto
 {
     public DateTime? TransactionDate { get; set; }
@@ -70,44 +33,90 @@ public class BillTransactionDto
     public TransactionAccount? Account { get; set; }
     public bool IsNoise { get; set; }
 
-    public BillTransactionDto() { }
-
-    public BillTransactionDto(TransactionType type, TransactionAccount account)
-    {
-        Type = type;
-        Account = account;
-    }
-
     public override string ToString()
     {
         return $"{Account}, {Type}, {TransactionDate?.ToString("""MM/dd/yyyy""")}, {Amount}, {Description}";
     }
 }
 
-public class WfBillTransactionDto : BillTransactionDto
+public class UniqueBillTransactionDto : EqualityComparer<BillTransactionDto>
 {
-    public WfBillTransactionDto() { }
-    public WfBillTransactionDto(TransactionType type, TransactionAccount account) : base(type, account) { }
-}
-public class JpmBillTransactionDto : BillTransactionDto
-{
-    public JpmBillTransactionDto() { }
-    public JpmBillTransactionDto(TransactionType type, TransactionAccount account) : base(type, account) { }
+    public override bool Equals(BillTransactionDto? x, BillTransactionDto? y)
+    {
+        if (x == null && y == null)
+            return true;
+        else if (x == null || y == null)
+            return false;
+
+        var hasSameDescription = (x.Description == null && y.Description == null)
+        || (x.Description != null && y.Description != null && x.Description.Equals(y.Description));
+
+        return
+            x.TransactionDate == y.TransactionDate &&
+            x.Amount == y.Amount &&
+            hasSameDescription;
+    }
+
+    public override int GetHashCode([DisallowNull] BillTransactionDto obj)
+    {
+        return (obj.TransactionDate.GetHashCode() ^ obj.Amount.GetHashCode() ^ obj.Description.GetHashCode()).GetHashCode();
+    }
 }
 
-public class WfNeedsDebitBillTransactionDto : WfBillTransactionDto
+public class BillTransactionCsvo : ICsvRecord
 {
-    public WfNeedsDebitBillTransactionDto() : base(TransactionType.DEBIT, TransactionAccount.NEEDS) { }
+    public string TransactionDate { get; set; } = string.Empty;
+    public string Amount { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public string Account { get; set; } = string.Empty;
+    public string IsNoise { get; set; } = string.Empty;
+
+    public override string ToString()
+    {
+        return $"{Account}, {Type}, {TransactionDate}, {Amount}, {Description}";
+    }
+
+    public string GetCsvHeader() => $"Transaction Date,Amount,Transaction Type,Account,Description,Is Noise"; // Tags
+
+    public string GetCsvRow() => $"{TransactionDate},{Amount},{Type},{Account},\"{Description}\",{IsNoise}";
 }
-public class WfNeedsCreditBillTransactionDto : WfBillTransactionDto
+
+public class BillTransactionExportCsvo : BillTransactionCsvo { }
+public class BillTransactionImportCsvo : BillTransactionCsvo
 {
-    public WfNeedsCreditBillTransactionDto() : base(TransactionType.CREDIT, TransactionAccount.NEEDS) { }
+    public BillTransactionImportCsvo() { }
+    public BillTransactionImportCsvo(TransactionType type, TransactionAccount account)
+    {
+        Type = type.ToString();
+        Account = account.ToString();
+    }
 }
-public class WfWantsDebitBillTransactionDto : WfBillTransactionDto
+
+public class WfBillTransactionCsvo : BillTransactionImportCsvo
 {
-    public WfWantsDebitBillTransactionDto() : base(TransactionType.DEBIT, TransactionAccount.WANTS) { }
+    public WfBillTransactionCsvo() { }
+    public WfBillTransactionCsvo(TransactionType type, TransactionAccount account) : base(type, account) { }
 }
-public class JpmWantsCreditBillTransactionDto : JpmBillTransactionDto
+public class JpmBillTransactionCsvo : BillTransactionImportCsvo
 {
-    public JpmWantsCreditBillTransactionDto() : base(TransactionType.CREDIT, TransactionAccount.WANTS) { }
+    public JpmBillTransactionCsvo() { }
+    public JpmBillTransactionCsvo(TransactionType type, TransactionAccount account) : base(type, account) { }
+}
+
+public class WfNeedsDebitBillTransactionCsvo : WfBillTransactionCsvo
+{
+    public WfNeedsDebitBillTransactionCsvo() : base(TransactionType.DEBIT, TransactionAccount.NEEDS) { }
+}
+public class WfNeedsCreditBillTransactionCsvo : WfBillTransactionCsvo
+{
+    public WfNeedsCreditBillTransactionCsvo() : base(TransactionType.CREDIT, TransactionAccount.NEEDS) { }
+}
+public class WfWantsDebitBillTransactionCsvo : WfBillTransactionCsvo
+{
+    public WfWantsDebitBillTransactionCsvo() : base(TransactionType.DEBIT, TransactionAccount.WANTS) { }
+}
+public class JpmWantsCreditBillTransactionCsvo : JpmBillTransactionCsvo
+{
+    public JpmWantsCreditBillTransactionCsvo() : base(TransactionType.CREDIT, TransactionAccount.WANTS) { }
 }

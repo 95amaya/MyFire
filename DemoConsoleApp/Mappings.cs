@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Net.Http.Headers;
 using AutoMapper;
 using Services.Models;
 
@@ -10,35 +12,39 @@ public class ImportMapProfile : Profile
 {
     public ImportMapProfile()
     {
-        // TODO: IEnumerable.ElementAtOrDefault
-        CreateMap<IList<object>, WfBillTransactionDto>()
-            .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => DateTime.ParseExact(src[0] as string, "MM/dd/yyyy", CultureInfo.InvariantCulture)))
-            .ForMember(dest => dest.Amount, act => act.MapFrom(src => src[1]))
-            .ForMember(dest => dest.Description, act => act.MapFrom(src => src[4]));
+        CreateMap<IList<string>, WfBillTransactionCsvo>()
+            .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => src.ElementAtOrDefault(0)))
+            .ForMember(dest => dest.Amount, act => act.MapFrom(src => src.ElementAtOrDefault(1)))
+            .ForMember(dest => dest.Description, act => act.MapFrom(src => src.ElementAtOrDefault(4)));
 
+        CreateMap<IList<string>, WfNeedsDebitBillTransactionCsvo>()
+            .IncludeBase<IList<string>, WfBillTransactionCsvo>();
+        CreateMap<IList<string>, WfWantsDebitBillTransactionCsvo>()
+            .IncludeBase<IList<string>, WfBillTransactionCsvo>();
+        CreateMap<IList<string>, WfNeedsCreditBillTransactionCsvo>()
+            .IncludeBase<IList<string>, WfBillTransactionCsvo>();
 
-        CreateMap<IList<object>, WfNeedsDebitBillTransactionDto>()
-            .IncludeBase<IList<object>, WfBillTransactionDto>();
-        CreateMap<IList<object>, WfWantsDebitBillTransactionDto>()
-            .IncludeBase<IList<object>, WfBillTransactionDto>();
-        CreateMap<IList<object>, WfNeedsCreditBillTransactionDto>()
-            .IncludeBase<IList<object>, WfBillTransactionDto>();
+        CreateMap<IList<string>, JpmBillTransactionCsvo>()
+            .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => src.ElementAtOrDefault(0)))
+            .ForMember(dest => dest.Amount, act => act.MapFrom(src => src.ElementAtOrDefault(5)))
+            .ForMember(dest => dest.Description, act => act.MapFrom(src => src.ElementAtOrDefault(2)));
 
-        CreateMap<IList<object>, JpmBillTransactionDto>()
-            .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => DateTime.ParseExact(src[0] as string, "MM/dd/yyyy", CultureInfo.InvariantCulture)))
-            .ForMember(dest => dest.Amount, act => act.MapFrom(src => src[5]))
-            .ForMember(dest => dest.Description, act => act.MapFrom(src => src[2]));
+        CreateMap<IList<string>, JpmWantsCreditBillTransactionCsvo>()
+            .IncludeBase<IList<string>, JpmBillTransactionCsvo>();
+    }
+}
 
-        CreateMap<IList<object>, JpmWantsCreditBillTransactionDto>()
-            .IncludeBase<IList<object>, JpmBillTransactionDto>();
-
-        CreateMap<IList<object>, BillTransactionCsv>()
-            .ForMember(dest => dest.transaction_date, act => act.MapFrom(src => DateTime.ParseExact(src[0] as string, "yyyy-MM-dd", CultureInfo.InvariantCulture)))
-            .ForMember(dest => dest.amount, act => act.MapFrom(src => src[1]))
-            .ForMember(dest => dest.transaction_type, act => act.MapFrom(src => src[2]))
-            .ForMember(dest => dest.transaction_account, act => act.MapFrom(src => src[3]))
-            .ForMember(dest => dest.description, act => act.MapFrom(src => src[4]))
-            .ForMember(dest => dest.is_noise, act => act.MapFrom(src => src[5]));
+public class ExportMapProfile : Profile
+{
+    public ExportMapProfile()
+    {
+        CreateMap<IList<string>, BillTransactionExportCsvo>()
+            .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => src.ElementAtOrDefault(0)))
+            .ForMember(dest => dest.Amount, act => act.MapFrom(src => src.ElementAtOrDefault(1)))
+            .ForMember(dest => dest.Type, act => act.MapFrom(src => src.ElementAtOrDefault(2)))
+            .ForMember(dest => dest.Account, act => act.MapFrom(src => src.ElementAtOrDefault(3)))
+            .ForMember(dest => dest.Description, act => act.MapFrom(src => src.ElementAtOrDefault(4)))
+            .ForMember(dest => dest.IsNoise, act => act.MapFrom(src => src.ElementAtOrDefault(5)));
     }
 }
 
@@ -46,15 +52,45 @@ public class TransformMapProfile : Profile
 {
     public TransformMapProfile()
     {
-        CreateMap<BillTransactionDto, BillTransactionCsv>()
-            .ForMember(dest => dest.transaction_date, act => act.MapFrom(src => src.TransactionDate))
-            .ForMember(dest => dest.amount, act => act.MapFrom(src => src.Amount))
-            .ForMember(dest => dest.description, act => act.MapFrom(src => src.Description))
-            .ForMember(dest => dest.transaction_type, act => act.MapFrom(src => src.Type.ToString()))
-            .ForMember(dest => dest.transaction_account, act => act.MapFrom(src => src.Account.ToString()))
-            .ForMember(dest => dest.is_noise, act => act.MapFrom(src => src.IsNoise))
+        CreateMap<BillTransactionDto, BillTransactionCsvo>()
+            .ForMember(dest => dest.TransactionDate, act => act.Ignore()) // Need to define in decsendents
+            .ForMember(dest => dest.Amount, act => act.MapFrom(src => src.Amount))
+            .ForMember(dest => dest.Description, act => act.MapFrom(src => src.Description))
+            .ForMember(dest => dest.Type, act => act.MapFrom(src => src.Type.ToString()))
+            .ForMember(dest => dest.Account, act => act.MapFrom(src => src.Account.ToString()))
+            .ForMember(dest => dest.IsNoise, act => act.MapFrom(src => src.IsNoise))
             .ReverseMap()
-            .ForPath(dest => dest.Type, act => act.MapFrom(src => Enum.Parse<TransactionType>(src.transaction_type)))
-            .ForPath(dest => dest.Account, act => act.MapFrom(src => Enum.Parse<TransactionAccount>(src.transaction_account)));
+            .ForMember(dest => dest.Type, act => act.MapFrom(src => Enum.Parse<TransactionType>(src.Type)))
+            .ForMember(dest => dest.Account, act => act.MapFrom(src => Enum.Parse<TransactionAccount>(src.Account)))
+            .ForMember(dest => dest.IsNoise, act => act.MapFrom(src => !string.IsNullOrEmpty(src.IsNoise) && bool.Parse(src.IsNoise)));
+
+        CreateMap<BillTransactionDto, BillTransactionExportCsvo>()
+            .IncludeBase<BillTransactionDto, BillTransactionCsvo>()
+            .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => src.TransactionDate.Value.ToString("yyyy-MM-dd")))
+            .ReverseMap()
+            .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => DateTime.ParseExact(src.TransactionDate, "yyyy-MM-dd", CultureInfo.InvariantCulture)));
+
+
+        CreateMap<BillTransactionDto, BillTransactionImportCsvo>()
+            .IncludeBase<BillTransactionDto, BillTransactionCsvo>()
+            .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => src.TransactionDate.Value.ToString("MM/dd/yyyy")))
+            .ReverseMap()
+            .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => DateTime.ParseExact(src.TransactionDate, "MM/dd/yyyy", CultureInfo.InvariantCulture)));
+
     }
 }
+
+// Exmple of Value Converter
+// public class BooleanConverter : IValueConverter<string, bool>
+// {
+//     public bool Convert(string sourceMember, ResolutionContext context)
+//     {
+//         if(string.IsNullOrEmpty(sourceMember))
+//         {
+//             return false;
+//         }
+
+//         return bool.Parse(sourceMember);
+//     }
+
+// }
