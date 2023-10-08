@@ -28,33 +28,38 @@ public static class MyFireDemo
         // Console.WriteLine(DateTime.Now.Date.ToString("s"));
         // Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd"));
         // Console.WriteLine(DateOnly.FromDateTime(DateTime.Now).ToString("s"));
-        // RunReport(_exportMapper, secrets.ExportFiles.DirPath, new DateTime(2022, 12, 01));
+
+        var csvReader = new CsvReader(_mapper);
+        var exportCsvoList = GetBillTransactionsFromCsv<BillTransactionExportCsvo>(csvReader, secrets.ExportFiles.File2023Path, skipFirstRow: true);
+
+        var startDate = new DateTime(2023, 09, 01);
+        var endDate = startDate.AddMonths(1);
+
+        var exportDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(exportCsvoList).Where(p => !p.IsNoise && p.TransactionDate >= startDate && p.TransactionDate < endDate);
+
+        // TODO: Clean up reports
+        RunReport("Needs Debit Report", exportDtoList, TransactionType.DEBIT, TransactionAccount.NEEDS);
+        RunReport("Wants Debit Report", exportDtoList, TransactionType.DEBIT, TransactionAccount.WANTS);
 
     }
 
-    private static void RunReport(IMapper _mapper, string exportPath, DateTime sinceInclusive)
+    private static void RunReport(string title, IEnumerable<BillTransactionDto> list, TransactionType type, TransactionAccount account)
     {
-        var csvWriter = new CsvWriter();
+        Console.WriteLine();
+        Console.WriteLine(title);
+        var items = list.Where(p => p.Type == type && p.Account == account).ToList();
 
-        // var dbos = _mapper.Map<IEnumerable<BillTransactionDbo>>(transactionDtos.OrderBy(p => p.TransactionDate));
+        Console.WriteLine("Income");
+        var incomeList = items.Where(p => p.Amount > 0).ToList();
+        incomeList.ForEach(Console.WriteLine);
+        Console.WriteLine($"Total = {incomeList.Sum(p => p.Amount)}");
 
-        // csvWriter.Write(Path.Combine(exportPath, "2023-BillTransactions.csv"), dbos);
-
-        // var incomeList = transactionDtos.Where(p => p.Amount > 0 && p.Account == TransactionAccount.NEEDS).ToList();
-        // incomeList.ForEach(Console.WriteLine);
-        // Console.WriteLine($"income total: {incomeList.Sum(p => p.Amount.GetValueOrDefault()):C0}");
-
-        // var transactionDtos = daoDb.Get(new DateTime(2023, 7, 31));
-        // var testBool = transactionDtos.Where(p => p.IsNoise.GetValueOrDefault());
-
-        // var oneMonthRawList = transactionDtos.Where(p => p.TransactionDate.GetValueOrDefault().Month == 1).ToList();
-
-        // var rawList = transactionDtos
-        //     .Where(p => p.Amount > 0 && p.Account == TransactionAccount.NEEDS && !p.Description.Contains("ONLINE TRANSFER") && p.TransactionDate.GetValueOrDefault().Month == 1)
-        //     .ToList();
-
-        // rawList.ForEach(Console.WriteLine);
-        // Console.WriteLine(rawList.Sum(p => p.Amount.GetValueOrDefault()).ToString("C0"));
+        Console.WriteLine();
+        Console.WriteLine("Spending");
+        var spendingList = items.Where(p => p.Amount < 0).ToList();
+        spendingList.ForEach(Console.WriteLine);
+        Console.WriteLine($"Total = {spendingList.Sum(p => p.Amount)}");
+        Console.WriteLine("---------------------------------------------");
 
         // var reportList = transactionDtos
         //     .Where(p => p.Amount > 0 && p.Account == TransactionAccount.NEEDS && !p.Description.Contains("ONLINE TRANSFER"))

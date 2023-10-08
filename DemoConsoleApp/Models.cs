@@ -11,7 +11,6 @@ public class Secrets
     public List<string> BillTransactionNoiseFilterList { get; set; }
     public BillTransactionImport ImportFiles { get; set; }
     public BillTransactionExport ExportFiles { get; set; }
-    public BillTransactionPastFiles PastFiles { get; set; }
 }
 
 public class BillTransactionImport
@@ -35,31 +34,9 @@ public class BillTransactionFiles
 
 public class BillTransactionExport
 {
-    private List<string> _currentDirArr = new() { Directory.GetCurrentDirectory() };
-    public IEnumerable<string> PathArr { get; set; }
-
-    public string DirPath => Path.Combine(_currentDirArr.Concat(PathArr).ToArray());
-}
-
-public class BillTransactionPast
-{
-    public IEnumerable<string> PathArr { get; set; }
-    public BillTransactionFiles Files { get; set; }
-
-    public string NeedsCreditPath => Path.Combine(PathArr.Append(Files.NeedsCredit).ToArray());
-    public string WantsCreditPath => Path.Combine(PathArr.Append(Files.WantsCredit).ToArray());
-    public string NeedsDebitPath => Path.Combine(PathArr.Append(Files.NeedsDebit).ToArray());
-    public string WantsDebitPath => Path.Combine(PathArr.Append(Files.WantsDebit).ToArray());
-}
-
-// Fix pathing
-public class BillTransactionPastFiles
-{
     public IEnumerable<string> PathArr { get; set; }
     public string File2023 { get; set; }
-    public string File2022 { get; set; }
-    public string File2021 { get; set; }
-    public string File2020 { get; set; }
 
+    public string DirPath => Path.Combine(PathArr.ToArray());
     public string File2023Path => Path.Combine(PathArr.Append(File2023).ToArray());
 }

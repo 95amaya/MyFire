@@ -26,19 +26,16 @@ public static class BillTransactionEtlJob
     {
         var _mapper = InitializeAutomapper();
 
-        // DateTime.TryParseExact("08/31/2023", "MM/dd/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var testConvert1);
-        // DateTime.TryParseExact("\"08/31/2023\"".Replace("\"", ""), "MM/dd/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var testConvert2);
-
         // Extract
         var csvReader = new CsvReader(_mapper);
         // TODO: Can improve by including a line starts with date string in order to not read in entire file
-        var exportFilePath = Path.Combine(secrets.ExportFiles.DirPath, secrets.PastFiles.File2023); //secrets.PastFiles.File2023Path
+        var exportFilePath = secrets.ExportFiles.File2023Path;
         var exportCsvoList = GetBillTransactionsFromCsv<BillTransactionExportCsvo>(csvReader, exportFilePath, skipFirstRow: true);
         var importCsvoList = ImportBillTransactionsFromCsv(csvReader, secrets.ImportFiles);
 
         // Transform
         // Normalize data to compare accurately
-        var cutoffDate = new DateTime(2023, 7, 29);
+        var cutoffDate = new DateTime(2023, 8, 25);
         var exportDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(exportCsvoList).Where(p => p.TransactionDate > cutoffDate).ToList();
         var importDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(importCsvoList);
 
@@ -69,10 +66,13 @@ public static class BillTransactionEtlJob
         var csvItemsToInsert = _mapper.Map<IEnumerable<BillTransactionExportCsvo>>(itemsToInsert.OrderBy(p => p.TransactionDate));
 
         // Load
-        // var csvWriter = new CsvWriter();
+        if (csvItemsToInsert.SafeHasRows())
+        {
+            var csvWriter = new CsvWriter();
 
-        // var cnt = csvWriter.Write(exportFilePath, csvItemsToInsert);
-        // Console.WriteLine($"{cnt} Transactions Written");
+            var cnt = csvWriter.Write(exportFilePath, csvItemsToInsert);
+            Console.WriteLine($"{cnt} Transactions Written");
+        }
 
         // If satisfied with result, then sync
     }

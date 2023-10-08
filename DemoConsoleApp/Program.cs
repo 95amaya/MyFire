@@ -8,7 +8,7 @@ class Program
         var secrets = Helper.ReadFromJson<Models.Secrets>("./DemoConsoleApp/secrets.json");
         // GoogleSheetsDemo.Run(args);
         // GoogleSheetsServicesDemo.Run(args);
-        BillTransactionEtlJob.Run(args, secrets);
-        // MyFireDemo.Run(args, secrets);
+        // BillTransactionEtlJob.Run(args, secrets);
+        MyFireDemo.Run(args, secrets);
     }
 }
