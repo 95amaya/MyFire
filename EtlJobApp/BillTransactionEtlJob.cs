@@ -24,44 +24,44 @@ public static class BillTransactionEtlJob
 
         // Transform
         // Normalize data to compare accurately
-        var cutoffDate = new DateTime(2023, 8, 25);
-        var exportDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(exportCsvoList).Where(p => p.TransactionDate > cutoffDate).ToList();
-        var importDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(importCsvoList);
+        // var cutoffDate = new DateTime(2023, 8, 25);
+        // var exportDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(exportCsvoList).Where(p => p.TransactionDate > cutoffDate).ToList();
+        // var importDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(importCsvoList);
 
-        var uniqueDto = new UniqueBillTransactionDto();
-        var itemsToInsert = importDtoList;
+        // var uniqueDto = new UniqueBillTransactionDto();
+        // var itemsToInsert = importDtoList;
 
-        var itemsToIgnore = exportDtoList.Intersect(importDtoList, uniqueDto).ToList();
+        // var itemsToIgnore = exportDtoList.Intersect(importDtoList, uniqueDto).ToList();
 
-        if (itemsToIgnore.SafeHasRows())
-        {
-            PrintSampleOfDataSet("Duplicate Items Found", itemsToIgnore);
-            itemsToInsert = importDtoList.Except(itemsToIgnore, uniqueDto);
-        }
+        // if (itemsToIgnore.SafeHasRows())
+        // {
+        //     PrintSampleOfDataSet("Duplicate Items Found", itemsToIgnore);
+        //     itemsToInsert = importDtoList.Except(itemsToIgnore, uniqueDto);
+        // }
 
-        foreach (var item in itemsToInsert)
-        {
-            foreach (var noiseFilter in secrets.BillTransactionNoiseFilterList)
-            {
-                if (Regex.IsMatch(item.Description, noiseFilter))
-                {
-                    item.IsNoise = true;
-                    break;
-                }
-            }
-        };
-        PrintSampleOfDataSet("Noise List Sample", itemsToInsert.Where(p => p.IsNoise).ToList());
+        // foreach (var item in itemsToInsert)
+        // {
+        //     foreach (var noiseFilter in secrets.BillTransactionNoiseFilterList)
+        //     {
+        //         if (Regex.IsMatch(item.Description, noiseFilter))
+        //         {
+        //             item.IsNoise = true;
+        //             break;
+        //         }
+        //     }
+        // };
+        // PrintSampleOfDataSet("Noise List Sample", itemsToInsert.Where(p => p.IsNoise).ToList());
 
-        var csvItemsToInsert = _mapper.Map<IEnumerable<BillTransactionExportCsvo>>(itemsToInsert.OrderBy(p => p.TransactionDate));
+        // var csvItemsToInsert = _mapper.Map<IEnumerable<BillTransactionExportCsvo>>(itemsToInsert.OrderBy(p => p.TransactionDate));
 
-        // Load
-        if (csvItemsToInsert.SafeHasRows())
-        {
-            var csvWriter = new CsvWriter();
+        // // Load
+        // if (csvItemsToInsert.SafeHasRows())
+        // {
+        //     var csvWriter = new CsvWriter();
 
-            var cnt = csvWriter.Write(exportFilePath, csvItemsToInsert);
-            Console.WriteLine($"{cnt} Transactions Written");
-        }
+        //     var cnt = csvWriter.Write(exportFilePath, csvItemsToInsert);
+        //     Console.WriteLine($"{cnt} Transactions Written");
+        // }
 
         // If satisfied with result, then sync
     }

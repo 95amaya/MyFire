@@ -1,4 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
+// Consume app in remote container
 using EtlJobApp;
 using Serilog;
 
@@ -14,6 +15,6 @@ if (secrets == null)
 
 log.Information("Hello, Serilog!");
 log.Information("secrets: {@Secrets}", secrets);
-BillTransactionEtlJob.Run(args, secrets);
+// BillTransactionEtlJob.Run(args, secrets);
 
 
