@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -8,6 +8,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Services\Services.csproj", "{6CEC2D90-F24E-44EC-B4EE-24A255A5A261}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services.Tests", "Services.Tests\Services.Tests.csproj", "{3570EB76-8ECA-472C-B667-8597F450FA23}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EtlJobApp", "EtlJobApp\EtlJobApp.csproj", "{8AFFE58A-2DCF-4F07-BE72-997CE4634D4B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,5 +32,9 @@ Global
 		{3570EB76-8ECA-472C-B667-8597F450FA23}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3570EB76-8ECA-472C-B667-8597F450FA23}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3570EB76-8ECA-472C-B667-8597F450FA23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AFFE58A-2DCF-4F07-BE72-997CE4634D4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AFFE58A-2DCF-4F07-BE72-997CE4634D4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AFFE58A-2DCF-4F07-BE72-997CE4634D4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AFFE58A-2DCF-4F07-BE72-997CE4634D4B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

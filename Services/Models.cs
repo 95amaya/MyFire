@@ -3,15 +3,6 @@ using Services.CoreLibraries;
 
 namespace Services.Models;
 
-public class BillTransactionSheet
-{
-    public string SheetId { get; set; } = string.Empty;
-    public string NeedsDebitTransactionRange { get; set; } = string.Empty;
-    public string WantsDebitTransactionRange { get; set; } = string.Empty;
-    public string NeedsCreditTransactionRange { get; set; } = string.Empty;
-    public string WantsCreditTransactionRange { get; set; } = string.Empty;
-}
-
 public enum TransactionType
 {
     DEBIT = 0,
