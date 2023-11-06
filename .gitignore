@@ -3,6 +3,7 @@ DemoConsoleApp/secrets.json
 EtlJobApp/secrets.json
 MyFireExport/
 output/
+downloads/
 mysqldb/
 secrets.sql
 

@@ -80,7 +80,9 @@ public class StringHashSetConverter : IValueConverter<string, HashSet<string>>
 {
     public HashSet<string> Convert(string sourceMember, ResolutionContext context)
     {
-        return sourceMember?.Split(',', StringSplitOptions.None).ToHashSet() ?? new HashSet<string>();
+        return string.IsNullOrWhiteSpace(sourceMember)
+            ? new HashSet<string>()
+            : sourceMember.Split(',', StringSplitOptions.None).ToHashSet();
     }
 }
 

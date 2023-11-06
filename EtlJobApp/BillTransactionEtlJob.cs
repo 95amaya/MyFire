@@ -22,24 +22,24 @@ public static class BillTransactionEtlJob
         // TODO: Can improve by including a line starts with date string in order to not read in entire file
         var exportFilePath = secrets.ExportFiles?.File2023Path ?? string.Empty;
         var exportCsvoList = GetBillTransactionsFromCsv<BillTransactionExportCsvo>(csvReader, exportFilePath, skipFirstRow: true);
-        // var importCsvoList = ImportBillTransactionsFromCsv(csvReader, secrets.ImportFiles); // May need to add as volume
+        var importCsvoList = ImportBillTransactionsFromCsv(csvReader, secrets.ImportFiles);
 
         // Transform
         // Normalize data to compare accurately
         var cutoffDate = new DateTime(2023, 8, 25);
         var exportDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(exportCsvoList).Where(p => p.TransactionDate > cutoffDate).ToList();
-        // var importDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(importCsvoList);
+        var importDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(importCsvoList);
 
-        // var uniqueDto = new UniqueBillTransactionDto();
-        // var itemsToInsert = importDtoList;
+        var uniqueDto = new UniqueBillTransactionDto();
+        var itemsToInsert = importDtoList;
 
-        // var itemsToIgnore = exportDtoList.Intersect(importDtoList, uniqueDto).ToList();
+        var itemsToIgnore = exportDtoList.Intersect(importDtoList, uniqueDto).ToList();
 
-        // if (itemsToIgnore.SafeHasRows())
-        // {
-        //     PrintSampleOfDataSet("Duplicate Items Found", itemsToIgnore);
-        //     itemsToInsert = importDtoList.Except(itemsToIgnore, uniqueDto);
-        // }
+        if (itemsToIgnore.SafeHasRows())
+        {
+            PrintSampleOfDataSet("Duplicate Items Found", itemsToIgnore);
+            itemsToInsert = importDtoList.Except(itemsToIgnore, uniqueDto);
+        }
 
         // foreach (var item in itemsToInsert)
         // {
@@ -92,7 +92,7 @@ public static class BillTransactionEtlJob
         transactionList.AddRange(wantsDebitTransactions);
         transactionList.AddRange(needsCreditTransactions);
         transactionList.AddRange(wantsCreditTransactions);
-        Console.WriteLine($"Total Bill Transactions Read: {transactionList.Count()}");
+        Logger?.Information($"Total Bill Transactions Read: {transactionList.Count()}");
 
         return transactionList;
     }
