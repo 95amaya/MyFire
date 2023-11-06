@@ -17,7 +17,8 @@
 				"esbenp.prettier-vscode",
 				"patcx.vscode-nuget-gallery",
 				"fernandoescolar.vscode-solution-explorer",
-				"mechatroner.rainbow-csv"
+				"mechatroner.rainbow-csv",
+				"mhutchie.git-graph"
 			]
 		}
 	}
