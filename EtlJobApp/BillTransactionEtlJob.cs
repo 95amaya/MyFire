@@ -2,17 +2,19 @@ using AutoMapper;
 using CoreLibraries;
 using EtlJobApp.Mappings;
 using EtlJobApp.Models;
+using Serilog;
 using Services.CoreLibraries;
 using Services.Models;
 using System.Text.RegularExpressions;
 
 namespace EtlJobApp;
-// TODO: use serilog for logging
 
 public static class BillTransactionEtlJob
 {
-    public static void Run(string[] args, Secrets secrets)
+    private static ILogger? Logger { get; set; }
+    public static void Run(ILogger logger, Secrets secrets)
     {
+        Logger = logger;
         var _mapper = InitializeAutomapper();
 
         // Extract
@@ -20,12 +22,12 @@ public static class BillTransactionEtlJob
         // TODO: Can improve by including a line starts with date string in order to not read in entire file
         var exportFilePath = secrets.ExportFiles?.File2023Path ?? string.Empty;
         var exportCsvoList = GetBillTransactionsFromCsv<BillTransactionExportCsvo>(csvReader, exportFilePath, skipFirstRow: true);
-        var importCsvoList = ImportBillTransactionsFromCsv(csvReader, secrets.ImportFiles);
+        // var importCsvoList = ImportBillTransactionsFromCsv(csvReader, secrets.ImportFiles); // May need to add as volume
 
         // Transform
         // Normalize data to compare accurately
-        // var cutoffDate = new DateTime(2023, 8, 25);
-        // var exportDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(exportCsvoList).Where(p => p.TransactionDate > cutoffDate).ToList();
+        var cutoffDate = new DateTime(2023, 8, 25);
+        var exportDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(exportCsvoList).Where(p => p.TransactionDate > cutoffDate).ToList();
         // var importDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(importCsvoList);
 
         // var uniqueDto = new UniqueBillTransactionDto();
@@ -108,21 +110,19 @@ public static class BillTransactionEtlJob
 
     private static void PrintSampleOfDataSet(string title, IEnumerable<BillTransactionCsvo> transactions)
     {
-        Console.WriteLine($"{title}, Count: {transactions.Count()}");
+        Logger?.Information($"{title}, Count: {transactions.Count()}");
         foreach (var transaction in transactions.Take(5))
         {
-            Console.WriteLine(transaction);
+            Logger?.Information($"Transaction: {transaction}");
         }
-        Console.WriteLine();
     }
 
     private static void PrintSampleOfDataSet(string title, IEnumerable<BillTransactionDto> transactions)
     {
-        Console.WriteLine($"{title}, Count: {transactions.Count()}");
+        Logger?.Information($"{title}, Count: {transactions.Count()}");
         foreach (var transaction in transactions.Take(5))
         {
-            Console.WriteLine(transaction);
+            Logger?.Information($"Transaction: {transaction}");
         }
-        Console.WriteLine();
     }
 }

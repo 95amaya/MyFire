@@ -40,7 +40,7 @@ public class ExportMapProfile : Profile
             .ForMember(dest => dest.Type, act => act.MapFrom(src => src.ElementAtOrDefault(2)))
             .ForMember(dest => dest.Account, act => act.MapFrom(src => src.ElementAtOrDefault(3)))
             .ForMember(dest => dest.Description, act => act.MapFrom(src => src.ElementAtOrDefault(4)))
-            .ForMember(dest => dest.IsNoise, act => act.MapFrom(src => src.ElementAtOrDefault(5)));
+            .ForMember(dest => dest.CustomTags, act => act.MapFrom(src => src.ElementAtOrDefault(5)));
     }
 }
 
@@ -54,11 +54,11 @@ public class TransformMapProfile : Profile
             .ForMember(dest => dest.Description, act => act.MapFrom(src => src.Description))
             .ForMember(dest => dest.Type, act => act.MapFrom(src => src.Type.ToString()))
             .ForMember(dest => dest.Account, act => act.MapFrom(src => src.Account.ToString()))
-            .ForMember(dest => dest.IsNoise, act => act.MapFrom(src => src.IsNoise))
+            .ForMember(dest => dest.CustomTags, act => act.MapFrom(src => string.Join(',', src.CustomTags)))
             .ReverseMap()
             .ForMember(dest => dest.Type, act => act.MapFrom(src => Enum.Parse<TransactionType>(src.Type)))
             .ForMember(dest => dest.Account, act => act.MapFrom(src => Enum.Parse<TransactionAccount>(src.Account)))
-            .ForMember(dest => dest.IsNoise, act => act.MapFrom(src => !string.IsNullOrEmpty(src.IsNoise) && bool.Parse(src.IsNoise)));
+            .ForMember(dest => dest.CustomTags, act => act.ConvertUsing(new StringHashSetConverter(), src => src.CustomTags));
 
         CreateMap<BillTransactionDto, BillTransactionExportCsvo>()
             .IncludeBase<BillTransactionDto, BillTransactionCsvo>()
@@ -73,6 +73,14 @@ public class TransformMapProfile : Profile
             .ReverseMap()
             .ForMember(dest => dest.TransactionDate, act => act.MapFrom(src => DateTime.ParseExact(src.TransactionDate, "MM/dd/yyyy", CultureInfo.InvariantCulture)));
 
+    }
+}
+
+public class StringHashSetConverter : IValueConverter<string, HashSet<string>>
+{
+    public HashSet<string> Convert(string sourceMember, ResolutionContext context)
+    {
+        return sourceMember?.Split(',', StringSplitOptions.None).ToHashSet() ?? new HashSet<string>();
     }
 }
 

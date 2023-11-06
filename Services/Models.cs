@@ -22,7 +22,7 @@ public class BillTransactionDto
     public string? Description { get; set; }
     public TransactionType? Type { get; set; }
     public TransactionAccount? Account { get; set; }
-    public bool IsNoise { get; set; }
+    public HashSet<string> CustomTags { get; set; } = new();
 
     public override string ToString()
     {
@@ -61,16 +61,16 @@ public class BillTransactionCsvo : ICsvRecord
     public string Description { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
     public string Account { get; set; } = string.Empty;
-    public string IsNoise { get; set; } = string.Empty;
+    public string CustomTags { get; set; } = string.Empty;
 
     public override string ToString()
     {
         return $"{Account}, {Type}, {TransactionDate}, {Amount}, {Description}";
     }
 
-    public string GetCsvHeader() => $"Transaction Date,Amount,Transaction Type,Account,Description,Is Noise"; // Tags
+    public string GetCsvHeader() => $"Transaction Date,Amount,Transaction Type,Account,Description,Custom Tags";
 
-    public string GetCsvRow() => $"{TransactionDate},{Amount},{Type},{Account},\"{Description}\",{IsNoise}";
+    public string GetCsvRow() => $"{TransactionDate},{Amount},{Type},{Account},\"{Description}\",{CustomTags}";
 }
 
 public class BillTransactionExportCsvo : BillTransactionCsvo { }
