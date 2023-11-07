@@ -26,7 +26,7 @@ public static class BillTransactionEtlJob
 
         // Transform
         // Normalize data to compare accurately
-        var cutoffDate = new DateTime(2023, 8, 25);
+        var cutoffDate = new DateTime(2023, 9, 25);
         var exportDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(exportCsvoList).Where(p => p.TransactionDate > cutoffDate).ToList();
         var importDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(importCsvoList);
 
@@ -41,29 +41,29 @@ public static class BillTransactionEtlJob
             itemsToInsert = importDtoList.Except(itemsToIgnore, uniqueDto);
         }
 
-        // foreach (var item in itemsToInsert)
-        // {
-        //     foreach (var noiseFilter in secrets.BillTransactionNoiseFilterList)
-        //     {
-        //         if (Regex.IsMatch(item.Description, noiseFilter))
-        //         {
-        //             item.IsNoise = true;
-        //             break;
-        //         }
-        //     }
-        // };
-        // PrintSampleOfDataSet("Noise List Sample", itemsToInsert.Where(p => p.IsNoise).ToList());
+        foreach (var item in itemsToInsert)
+        {
+            foreach (var noiseFilter in secrets.BillTransactionNoiseFilterList)
+            {
+                if (item.Description != null && Regex.IsMatch(item.Description, noiseFilter))
+                {
+                    item.CustomTags.Add(KnownCustomTags.NOISE.ToString());
+                    break;
+                }
+            }
+        };
+        PrintSampleOfDataSet("Noise List Sample", itemsToInsert.Where(p => p.CustomTags.Contains(KnownCustomTags.NOISE.ToString())).ToList());
 
-        // var csvItemsToInsert = _mapper.Map<IEnumerable<BillTransactionExportCsvo>>(itemsToInsert.OrderBy(p => p.TransactionDate));
+        var csvItemsToInsert = _mapper.Map<IEnumerable<BillTransactionExportCsvo>>(itemsToInsert.OrderBy(p => p.TransactionDate));
 
-        // // Load
-        // if (csvItemsToInsert.SafeHasRows())
-        // {
-        //     var csvWriter = new CsvWriter();
+        // Load
+        if (csvItemsToInsert.SafeHasRows())
+        {
+            var csvWriter = new CsvWriter();
 
-        //     var cnt = csvWriter.Write(exportFilePath, csvItemsToInsert);
-        //     Console.WriteLine($"{cnt} Transactions Written");
-        // }
+            var cnt = csvWriter.Write(exportFilePath, csvItemsToInsert);
+            Console.WriteLine($"{cnt} Transactions Written");
+        }
 
         // If satisfied with result, then sync
     }

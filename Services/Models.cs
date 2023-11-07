@@ -15,6 +15,12 @@ public enum TransactionAccount
     WANTS = 1,
 }
 
+public enum KnownCustomTags
+{
+    NOISE = 0,
+    VACATION = 1
+}
+
 public class BillTransactionDto
 {
     public DateTime? TransactionDate { get; set; }
@@ -63,6 +69,15 @@ public class BillTransactionCsvo : ICsvRecord
     public string Account { get; set; } = string.Empty;
     public string CustomTags { get; set; } = string.Empty;
 
+    private string? GetCustomTagAsCsvValue()
+    {
+        if (string.IsNullOrEmpty(CustomTags))
+        {
+            return null;
+        }
+        return $"\"{CustomTags}\"";
+    }
+
     public override string ToString()
     {
         return $"{Account}, {Type}, {TransactionDate}, {Amount}, {Description}";
@@ -70,7 +85,7 @@ public class BillTransactionCsvo : ICsvRecord
 
     public string GetCsvHeader() => $"Transaction Date,Amount,Transaction Type,Account,Description,Custom Tags";
 
-    public string GetCsvRow() => $"{TransactionDate},{Amount},{Type},{Account},\"{Description}\",{CustomTags}";
+    public string GetCsvRow() => $"{TransactionDate},{Amount},{Type},{Account},\"{Description}\",{GetCustomTagAsCsvValue()}";
 }
 
 public class BillTransactionExportCsvo : BillTransactionCsvo { }

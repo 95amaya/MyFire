@@ -2,8 +2,8 @@ DemoConsoleApp/token.json
 DemoConsoleApp/secrets.json
 EtlJobApp/secrets.json
 MyFireExport/
-output/
-downloads/
+import/
+export/
 mysqldb/
 secrets.sql
 
