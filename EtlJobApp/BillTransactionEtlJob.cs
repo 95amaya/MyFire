@@ -26,7 +26,7 @@ public static class BillTransactionEtlJob
 
         // Transform
         // Normalize data to compare accurately
-        var cutoffDate = new DateTime(2023, 9, 25);
+        var cutoffDate = new DateTime(2023, 10, 25);
         var exportDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(exportCsvoList).Where(p => p.TransactionDate > cutoffDate).ToList();
         var importDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(importCsvoList);
 
@@ -47,12 +47,12 @@ public static class BillTransactionEtlJob
             {
                 if (item.Description != null && Regex.IsMatch(item.Description, noiseFilter))
                 {
-                    item.CustomTags.Add(KnownCustomTags.NOISE.ToString());
+                    item.Label = KnownCustomTags.NOISE.ToString();
                     break;
                 }
             }
         };
-        PrintSampleOfDataSet("Noise List Sample", itemsToInsert.Where(p => p.CustomTags.Contains(KnownCustomTags.NOISE.ToString())).ToList());
+        PrintSampleOfDataSet("Noise List Sample", itemsToInsert.Where(p => p.Label != null && p.Label.StartsWith(KnownCustomTags.NOISE.ToString())).ToList());
 
         var csvItemsToInsert = _mapper.Map<IEnumerable<BillTransactionExportCsvo>>(itemsToInsert.OrderBy(p => p.TransactionDate));
 
@@ -64,8 +64,6 @@ public static class BillTransactionEtlJob
             var cnt = csvWriter.Write(exportFilePath, csvItemsToInsert);
             Console.WriteLine($"{cnt} Transactions Written");
         }
-
-        // If satisfied with result, then sync
     }
 
     private static List<T> GetBillTransactionsFromCsv<T>(CsvReader csvReader, string path, bool skipFirstRow = false) where T : class, new()

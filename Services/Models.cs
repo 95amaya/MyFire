@@ -28,11 +28,11 @@ public class BillTransactionDto
     public string? Description { get; set; }
     public TransactionType? Type { get; set; }
     public TransactionAccount? Account { get; set; }
-    public HashSet<string> CustomTags { get; set; } = new();
+    public string? Label { get; set; }
 
     public override string ToString()
     {
-        return $"{Account}, {Type}, {TransactionDate?.ToString("""MM/dd/yyyy""")}, {Amount}, {Description}";
+        return $"{Account}, {Type}, {TransactionDate?.ToString("""MM/dd/yyyy""")}, {Amount}, {Description}, {Label}";
     }
 }
 
@@ -67,15 +67,15 @@ public class BillTransactionCsvo : ICsvRecord
     public string Description { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
     public string Account { get; set; } = string.Empty;
-    public string CustomTags { get; set; } = string.Empty;
+    public string Label { get; set; } = string.Empty;
 
-    private string? GetCustomTagAsCsvValue()
+    private string? GetLabelAsCsvValue()
     {
-        if (string.IsNullOrEmpty(CustomTags))
+        if (string.IsNullOrEmpty(Label))
         {
             return null;
         }
-        return $"\"{CustomTags}\"";
+        return $"\"{Label}\"";
     }
 
     public override string ToString()
@@ -83,9 +83,9 @@ public class BillTransactionCsvo : ICsvRecord
         return $"{Account}, {Type}, {TransactionDate}, {Amount}, {Description}";
     }
 
-    public string GetCsvHeader() => $"Transaction Date,Amount,Transaction Type,Account,Description,Custom Tags";
+    public string GetCsvHeader() => $"Transaction Date,Amount,Transaction Type,Account,Description,Label";
 
-    public string GetCsvRow() => $"{TransactionDate},{Amount},{Type},{Account},\"{Description}\",{GetCustomTagAsCsvValue()}";
+    public string GetCsvRow() => $"{TransactionDate},{Amount},{Type},{Account},\"{Description}\",{GetLabelAsCsvValue()}";
 }
 
 public class BillTransactionExportCsvo : BillTransactionCsvo { }
