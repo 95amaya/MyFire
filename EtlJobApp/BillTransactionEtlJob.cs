@@ -26,7 +26,7 @@ public static class BillTransactionEtlJob
 
         // Transform
         // Normalize data to compare accurately
-        var cutoffDate = new DateTime(2023, 10, 25);
+        var cutoffDate = new DateTime(2023, 11, 25);
         var exportDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(exportCsvoList).Where(p => p.TransactionDate > cutoffDate).ToList();
         var importDtoList = _mapper.Map<IEnumerable<BillTransactionDto>>(importCsvoList);
 
