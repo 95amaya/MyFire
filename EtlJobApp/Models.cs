@@ -30,7 +30,9 @@ public class BillTransactionExport
 {
     public IEnumerable<string> PathArr { get; set; } = new List<string>();
     public string File2023 { get; set; } = string.Empty;
+    public string File2024 { get; set; } = string.Empty;
 
     public string DirPath => Path.Combine(PathArr.ToArray());
-    public string File2023Path => Path.Combine(PathArr.Append(File2023).ToArray());
+
+    public string FilePath => Path.Combine(PathArr.Append(File2024).ToArray());
 }

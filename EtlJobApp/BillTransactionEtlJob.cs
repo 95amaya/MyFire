@@ -20,7 +20,7 @@ public static class BillTransactionEtlJob
         // Extract
         var csvReader = new CsvReader(_mapper);
         // TODO: Can improve by including a line starts with date string in order to not read in entire file
-        var exportFilePath = secrets.ExportFiles?.File2023Path ?? string.Empty;
+        var exportFilePath = secrets.ExportFiles?.FilePath ?? string.Empty;
         var exportCsvoList = GetBillTransactionsFromCsv<BillTransactionExportCsvo>(csvReader, exportFilePath, skipFirstRow: true);
         var importCsvoList = ImportBillTransactionsFromCsv(csvReader, secrets.ImportFiles);
 
@@ -68,8 +68,16 @@ public static class BillTransactionEtlJob
 
     private static List<T> GetBillTransactionsFromCsv<T>(CsvReader csvReader, string path, bool skipFirstRow = false) where T : class, new()
     {
-        using var sr = new StreamReader(path);
-        return csvReader.Read<T>(sr, skipFirstRow).ToList();
+        try
+        {
+            using var sr = new StreamReader(path);
+            return csvReader.Read<T>(sr, skipFirstRow).ToList();
+        }
+        catch (Exception ex)
+        {
+            Logger?.Information($"Can't Read File: {ex.StackTrace}");
+            return new List<T>();
+        }
     }
     private static List<BillTransactionCsvo> ImportBillTransactionsFromCsv(CsvReader csvReader, BillTransactionImport import)
     {
