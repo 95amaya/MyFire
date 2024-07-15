@@ -6,6 +6,7 @@ import/
 export/
 mysqldb/
 secrets.sql
+.mono/
 
 #Ignore thumbnails created by Windows
 Thumbs.db
